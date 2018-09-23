@@ -16,14 +16,14 @@ estimator_grid <- list(
     forestry(Xobs, Yobs, nodesizeStrictSpl = 25, overfitPenalty = 5, ridgeRF = TRUE),
   "ridge_5" = function(Xobs, Yobs)
     forestry(Xobs, Yobs, mtry = 3, ridgeRF = TRUE, overfitPenalty = 30),
-  
+
   "ranger_1" = function(Xobs, Yobs)
     ranger(Yobs ~., data = cbind(Xobs, Yobs)),
   "ranger_2" = function(Xobs, Yobs)
     ranger(Yobs ~., data = cbind(Xobs, Yobs)),
   "ranger_3" = function(Xobs, Yobs)
     ranger(Yobs ~., data = cbind(Xobs, Yobs)),
-  
+
   "glmnet_1" = function(Xobs, Yobs)
     glmnet(x = data.matrix(Xobs), y = y, alpha = 1),
   "glmnet_2" = function(Xobs, Yobs)
