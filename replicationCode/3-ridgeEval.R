@@ -1,13 +1,23 @@
+if (dir.exists("~/Dropbox/ridgeEvaluation/")) {
+  setwd("~/Dropbox/ridgeEvaluation/")
+} else {
+  setwd("~/ridgeEvaluationCode/")
+}
 library(forestry)
 library(ranger)
 library(glmnet)
 library(tidyverse)
 library(reshape)
 
-setwd("~/ridgeEvaluationCode/")
-
 data_folder_name <- "replicationCode/estimates/"
 dir.create(data_folder_name, showWarnings = FALSE)
+
+source("replicationCode/1-generateData.R")
+source("replicationCode/2-generateEstimators.R")
+
+set.seed(634801)
+
+# Loop through data sets -------------------------------------------------------
 
 # Validate Lambda selection
 # Cycle through matrix of estimators/datasets
@@ -59,3 +69,4 @@ for (dataset_i in 1:length(datasets)) {
       )
   }
 }
+
