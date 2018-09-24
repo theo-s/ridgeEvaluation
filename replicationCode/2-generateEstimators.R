@@ -25,11 +25,11 @@ estimator_grid <- list(
     ranger(Yobs ~., data = cbind(Xobs, Yobs)),
 
   "glmnet_1" = function(Xobs, Yobs)
-    glmnet(x = data.matrix(Xobs), y = y, alpha = 1),
+    glmnet(x = data.matrix(Xobs), y = Yobs, alpha = 1),
   "glmnet_2" = function(Xobs, Yobs)
-    glmnet(x = data.matrix(Xobs), y = y, alpha = 0),
+    glmnet(x = data.matrix(Xobs), y = Yobs, alpha = 0),
   "glmnet_3" = function(Xobs, Yobs)
-    glmnet(x = data.matrix(Xobs), y = y, alpha = .5)
+    glmnet(x = data.matrix(Xobs), y = Yobs, alpha = .5)
 )
 
 
