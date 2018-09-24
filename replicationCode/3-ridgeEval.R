@@ -12,14 +12,20 @@ dir.create(data_folder_name, showWarnings = FALSE)
 # Validate Lambda selection
 # Cycle through matrix of estimators/datasets
 # Output results as .csv
+sample.fraction <- .3
 
 # Loop through all datset, estimator combination
 for (dataset_i in 1:length(datasets)) {
   print(paste("Dataset = ", names(datasets)[dataset_i]))
 
   data <- datasets[[dataset_i]]
-  Xobs <- data[,-ncol(data)]
-  Yobs <- data[,ncol(data)]
+  test_index <- sample(nrow(data), round(sample.fraction * nrow(data)))
+  
+  Xtrain <- data[-test_index, -ncol(data)]
+  Xtest <- data[test_index, -ncol(data)]
+  
+  Ytrain <- data[-test_index, ncol(data)]
+  Ytest <- data[test_index, ncol(data)]
   data_name <- names(datasets)[dataset_i]
   
   for (estimator_i in 1:length(estimator_grid)) {
@@ -33,8 +39,8 @@ for (dataset_i in 1:length(datasets)) {
     
     estimate_i <-
       tryCatch({
-        E <- estimator(Xobs = Xobs, Yobs = Yobs)
-        predictor(E, Xobs)
+        E <- estimator(Xobs = Xtrain, Yobs = Ytrain)
+        predictor(E, Xtest)
       },
       error = function(err) {
         print(err)
@@ -43,6 +49,7 @@ for (dataset_i in 1:length(datasets)) {
       })
         
     estimate_i <- as.data.frame(estimate_i)
+    estimate_i <- cbind(estimate_i, Ytest)
     
     filename <-
       paste0(data_folder_name, estimator_name,"-", data_name, ".csv")
