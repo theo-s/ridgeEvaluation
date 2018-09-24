@@ -15,7 +15,7 @@ dir.create(data_folder_name, showWarnings = FALSE)
 
 # Set fraction of data set aside for training + several sample sizes used
 sample.fraction <- .3
-sample.sizes <- c(50)
+sample.sizes <- c(500)
 
 # Loop through all datset, estimator combination
 for (sampsize in sample.sizes) {
