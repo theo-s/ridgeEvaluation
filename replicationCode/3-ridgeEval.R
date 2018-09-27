@@ -20,31 +20,33 @@ set.seed(634801)
 # Loop through data sets -------------------------------------------------------
 
 # Validate Lambda selection
-# Cycle through matrix of estimators/datasets
+# Cycle through matrix of estimators/datasets_grid
 # Output results as .csv
 
 # Set fraction of data set aside for training + several sample sizes used
-sample.fraction <- .3
-sample.sizes <- c(500)
+samplesize_grid <- 4 * 2^(1:10)
 
 
 # Loop through all datset, estimator combination
-for (sampsize in sample.sizes) {
-  for (dataset_i in 1:length(datasets)) {
-    print(paste("Dataset = ", names(datasets)[dataset_i]))
+for (sampsize in samplesize_grid) {
+  for (dataset_i in 1:length(datasets_grid)) {
+    # sampsize = 128; dataset_i = 2
+    data_name <- names(datasets_grid)[dataset_i]
+    
+    print(paste("Dataset =", data_name, 
+                "and smpsize =", sampsize))
   
-    data <- datasets[[dataset_i]]
-    data <- data[1:sampsize,]
-    test_index <- sample(nrow(data), round(sample.fraction * nrow(data)))
+    data_train <- datasets_grid[[dataset_i]][["train"]][1:sampsize,]
+    data_test <- datasets_grid[[dataset_i]][["test"]]
     
-    Xtrain <- data[-test_index, -ncol(data)]
-    Xtest <- data[test_index, -ncol(data)]
+    Xtrain <- data_train[, -ncol(data_train)]
+    Xtest <- data_test[, -ncol(data_test)]
     
-    Ytrain <- data[-test_index, ncol(data)]
-    Ytest <- data[test_index, ncol(data)]
-    data_name <- names(datasets)[dataset_i]
+    Ytrain <- data_train[, ncol(data_train)]
+    Ytest <- data_test[, ncol(data_test)]
     
     for (estimator_i in 1:length(estimator_grid)) {
+      # estimator_i = 1
       print(paste("Estimator = ", estimator_i))
       
       estimate_i <- NULL
@@ -55,7 +57,7 @@ for (sampsize in sample.sizes) {
       
       estimate_i <-
         tryCatch({
-          E <- estimator(Xobs = Xtrain, Yobs = Ytrain)
+          E <- estimator(Xobs = as.data.frame(Xtrain), Yobs = Ytrain)
           predictor(E, Xtest)
         },
         error = function(err) {
