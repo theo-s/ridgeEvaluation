@@ -33,6 +33,10 @@ for (sampsize in samplesize_grid) {
     # sampsize = 128; dataset_i = 2
     data_name <- names(datasets_grid)[dataset_i]
     
+    if (sampsize > nrow(datasets_grid[[dataset_i]][["train"]])) {
+      next
+    }
+    
     print(paste("Dataset =", data_name, 
                 "and smpsize =", sampsize))
   
