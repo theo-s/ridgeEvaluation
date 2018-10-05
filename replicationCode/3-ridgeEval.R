@@ -1,8 +1,16 @@
 if (dir.exists("~/Dropbox/ridgeEvaluation/")) {
   setwd("~/Dropbox/ridgeEvaluation/")
-} else {
+} else if (dir.exists("~/ridgeEvaluationCode/")) {
   setwd("~/ridgeEvaluationCode/")
+} else if (dir.exists("~/ridgeEvaluation/")) {
+  setwd("~/ridgeEvaluation/")
+} else {
+  stop("wd was not set correctly")
 }
+
+# install most up to date version of forestry
+devtools::install_github("soerenkuenzel/forestry", ref = "RidgeRF")
+
 library(forestry)
 library(ranger)
 library(glmnet)
@@ -58,6 +66,14 @@ for (sampsize in samplesize_grid) {
       estimator <- estimator_grid[[estimator_i]]
       estimator_name <- names(estimator_grid)[estimator_i]
       predictor <- predictor_grid[[estimator_name]]
+      
+      filename <-
+        paste0(data_folder_name, estimator_name,"-", data_name,"-",sampsize, 
+               ".csv")
+      if(file.exists(filename)) {
+        print("File already exists. Running next file!")
+        next()
+      }
       
       estimate_i <-
         tryCatch({
