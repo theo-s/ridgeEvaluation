@@ -82,7 +82,6 @@ for (sampsize in samplesize_grid) {
       write.table(
         estimate_i,
         file = filename,
-        append = TRUE,
         col.names = col.names,
         row.names = FALSE,
         sep = ","
