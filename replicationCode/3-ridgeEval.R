@@ -3,6 +3,10 @@ if (dir.exists("~/Dropbox/ridgeEvaluation/")) {
 } else {
   setwd("~/ridgeEvaluationCode/")
 }
+
+# install most up to date version of forestry
+devtools::install_github("soerenkuenzel/forestry", branch = "RidgeRF")
+
 library(forestry)
 library(ranger)
 library(glmnet)
@@ -39,7 +43,7 @@ for (sampsize in samplesize_grid) {
     
     print(paste("Dataset =", data_name, 
                 "and smpsize =", sampsize))
-  
+    
     data_train <- datasets_grid[[dataset_i]][["train"]][1:sampsize,]
     data_test <- datasets_grid[[dataset_i]][["test"]]
     
@@ -69,7 +73,7 @@ for (sampsize in samplesize_grid) {
           warning(paste("Error when running", estimator_name))
           return(NA)
         })
-          
+      
       estimate_i <- as.data.frame(estimate_i)
       estimate_i <- cbind(estimate_i, Ytest)
       
@@ -85,7 +89,7 @@ for (sampsize in samplesize_grid) {
         col.names = col.names,
         row.names = FALSE,
         sep = ","
-        )
+      )
     }
   }
 }
