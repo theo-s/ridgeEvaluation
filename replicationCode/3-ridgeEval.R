@@ -9,7 +9,7 @@ if (dir.exists("~/Dropbox/ridgeEvaluation/")) {
 }
 
 # install most up to date version of forestry
-devtools::install_github("soerenkuenzel/forestry", ref = "RidgeRF")
+devtools::install_github("soerenkuenzel/forestry", ref = "master")
 
 library(forestry)
 library(ranger)
