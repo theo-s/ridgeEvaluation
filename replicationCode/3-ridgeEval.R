@@ -74,7 +74,8 @@ for (sampsize in samplesize_grid) {
       estimate_i <- cbind(estimate_i, Ytest)
       
       filename <-
-        paste0(data_folder_name, estimator_name,"-", data_name,"-",sampsize, ".csv")
+        paste0(data_folder_name, estimator_name,"-", data_name,"-",sampsize, 
+               ".csv")
       
       col.names <- !file.exists(filename)
       
