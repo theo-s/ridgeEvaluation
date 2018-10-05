@@ -61,7 +61,16 @@ for (sampsize in samplesize_grid) {
       
       estimate_i <-
         tryCatch({
+          training_time_start <- Sys.time()
+          
           E <- estimator(Xobs = as.data.frame(Xtrain), Yobs = Ytrain)
+          
+          training_time <- as.numeric(difftime(Sys.time(),
+                                               training_time_start,
+                                               tz,
+                                               units = "mins"))
+          
+          prediction_time_start <- Sys.time()
           predictor(E, Xtest)
         },
         error = function(err) {
@@ -69,9 +78,16 @@ for (sampsize in samplesize_grid) {
           warning(paste("Error when running", estimator_name))
           return(NA)
         })
-          
+      
+      prediction_time <- as.numeric(difftime(Sys.time(),
+                                             prediction_time_start,
+                                             tz,
+                                             units = "mins"))
+      
       estimate_i <- as.data.frame(estimate_i)
       estimate_i <- cbind(estimate_i, Ytest)
+      estimate_i <- cbind(estimate_i, training_time)
+      estimate_i <- cbind(estimate_i, prediction_time)
       
       filename <-
         paste0(data_folder_name, estimator_name,"-", data_name,"-",sampsize, 
