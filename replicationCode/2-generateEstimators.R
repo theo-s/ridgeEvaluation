@@ -6,16 +6,16 @@ library(ggplot2)
 # Define all estimators:
 
 estimator_grid <- list(
-  "ridge_1" = function(Xobs, Yobs)
-    forestry(Xobs, Yobs, ridgeRF = TRUE),
-  "ridge_2" = function(Xobs, Yobs)
-    forestry(Xobs, Yobs, nodesizeStrictSpl = 25, ridgeRF = TRUE),
-  "ridge_3" = function(Xobs, Yobs)
-    forestry(Xobs, Yobs, nodesizeStrictSpl = 50, ridgeRF = TRUE),
-  "ridge_4" = function(Xobs, Yobs)
-    forestry(Xobs, Yobs, nodesizeStrictSpl = 25, overfitPenalty = 5, ridgeRF = TRUE),
-  "ridge_5" = function(Xobs, Yobs)
-    forestry(Xobs, Yobs, mtry = 3, ridgeRF = TRUE, overfitPenalty = 30),
+  "ridge_1" = function(Xobs, Yobs, lambda)
+    forestry(Xobs, Yobs, ridgeRF = TRUE, overfitPenalty = lambda),
+  "ridge_2" = function(Xobs, Yobs, lambda)
+    forestry(Xobs, Yobs, nodesizeStrictSpl = 25, ridgeRF = TRUE, overfitPenalty = lambda),
+  "ridge_3" = function(Xobs, Yobs, lambda)
+    forestry(Xobs, Yobs, ntree = 25, nodesizeStrictSpl = 50, ridgeRF = TRUE, overfitPenalty = lambda),
+  "ridge_4" = function(Xobs, Yobs, lambda)
+    forestry(Xobs, Yobs, nodesizeStrictSpl = 25, ridgeRF = TRUE, overfitPenalty = lambda),
+  "ridge_5" = function(Xobs, Yobs, lambda)
+    forestry(Xobs, Yobs, mtry = 3, ridgeRF = TRUE, overfitPenalty = lambda),
 
   "ranger_1" = function(Xobs, Yobs)
     ranger(Yobs ~., data = cbind(Xobs, Yobs)),
