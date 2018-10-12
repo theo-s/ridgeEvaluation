@@ -9,11 +9,14 @@ estimator_grid <- list(
   "ridge_1" = function(Xobs, Yobs, lambda)
     forestry(Xobs, Yobs, ridgeRF = TRUE, overfitPenalty = lambda),
   "ridge_2" = function(Xobs, Yobs, lambda)
-    forestry(Xobs, Yobs, nodesizeStrictSpl = 25, ridgeRF = TRUE, overfitPenalty = lambda),
+    forestry(Xobs, Yobs, nodesizeStrictSpl = 25, ridgeRF = TRUE, 
+             overfitPenalty = lambda),
   "ridge_3" = function(Xobs, Yobs, lambda)
-    forestry(Xobs, Yobs, ntree = 25, nodesizeStrictSpl = 50, ridgeRF = TRUE, overfitPenalty = lambda),
+    forestry(Xobs, Yobs, ntree = 25, nodesizeStrictSpl = 50, ridgeRF = TRUE, 
+             overfitPenalty = lambda),
   "ridge_4" = function(Xobs, Yobs, lambda)
-    forestry(Xobs, Yobs, nodesizeStrictSpl = 25, ridgeRF = TRUE, overfitPenalty = lambda),
+    forestry(Xobs, Yobs, nodesizeStrictSpl = 25, ridgeRF = TRUE, 
+             overfitPenalty = lambda),
   "ridge_5" = function(Xobs, Yobs, lambda)
     forestry(Xobs, Yobs, mtry = 3, ridgeRF = TRUE, overfitPenalty = lambda),
 

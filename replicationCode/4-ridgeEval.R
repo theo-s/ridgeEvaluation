@@ -75,11 +75,11 @@ for (sampsize in samplesize_grid) {
       filename <-
         paste0(data_folder_name, estimator_name,"-", data_name,"-",sampsize, 
                ".csv")
-      if(file.exists(filename)) {
+      if (file.exists(filename)) {
         print("File already exists. Running next file!")
         next()
       }
-      
+      browser()
       estimate_i <-
         tryCatch({
           #If ridge RF, CV select lambda
@@ -93,11 +93,11 @@ for (sampsize in samplesize_grid) {
           
           training_time_start <- Sys.time()
           if (length(formals(estimator)) == 3) {
-            E <- estimator(Xobs = as.data.frame(Xtrain), 
-                           Yobs = Ytrain, 
+            E <- estimator(Xobs = as.data.frame(Xtrain),
+                           Yobs = Ytrain,
                            lambda = l)
           } else {
-            E <- estimator(Xobs = as.data.frame(Xtrain), 
+            E <- estimator(Xobs = as.data.frame(Xtrain),
                            Yobs = Ytrain)
           }
           
