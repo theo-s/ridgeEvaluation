@@ -22,6 +22,7 @@ dir.create(data_folder_name, showWarnings = FALSE)
 
 source("replicationCode/1-generateData.R")
 source("replicationCode/2-generateEstimators.R")
+source("replicationCode/3-defineLambdaSelection.R")
 
 set.seed(634801)
 
@@ -34,6 +35,10 @@ set.seed(634801)
 # Set fraction of data set aside for training + several sample sizes used
 samplesize_grid <- 4 * 2^(1:10)
 
+
+# Fold # and lambda list for CV
+lambdas <- c(1:30) / 10
+k <- 5
 
 # Loop through all datset, estimator combination
 for (sampsize in samplesize_grid) {
@@ -77,9 +82,24 @@ for (sampsize in samplesize_grid) {
       
       estimate_i <-
         tryCatch({
-          training_time_start <- Sys.time()
+          #If ridge RF, CV select lambda
+          if (length(formals(estimator)) == 3) {
+            l <- lambdaCrossValidation(as.data.frame(Xtrain),
+                                       Ytrain,
+                                       lambdas,
+                                       k,
+                                       estimator)
+          }
           
-          E <- estimator(Xobs = as.data.frame(Xtrain), Yobs = Ytrain)
+          training_time_start <- Sys.time()
+          if (length(formals(estimator)) == 3) {
+            E <- estimator(Xobs = as.data.frame(Xtrain), 
+                           Yobs = Ytrain, 
+                           lambda = l)
+          } else {
+            E <- estimator(Xobs = as.data.frame(Xtrain), 
+                           Yobs = Ytrain)
+          }
           
           training_time <- as.numeric(difftime(Sys.time(),
                                                training_time_start,
