@@ -79,7 +79,8 @@ for (sampsize in samplesize_grid) {
         print("File already exists. Running next file!")
         next()
       }
-      browser()
+
+      training_time <- prediction_time <- NA
       estimate_i <-
         tryCatch({
           #If ridge RF, CV select lambda
@@ -107,7 +108,12 @@ for (sampsize in samplesize_grid) {
                                                units = "mins"))
           
           prediction_time_start <- Sys.time()
-          predictor(E, Xtest)
+          pdts <- predictor(E, Xtest)
+          prediction_time <- as.numeric(difftime(Sys.time(),
+                                                 prediction_time_start,
+                                                 tz,
+                                                 units = "mins"))
+          pdts
         },
         error = function(err) {
           print(err)
@@ -115,19 +121,14 @@ for (sampsize in samplesize_grid) {
           return(NA)
         })
       
-      prediction_time <- as.numeric(difftime(Sys.time(),
-                                             prediction_time_start,
-                                             tz,
-                                             units = "mins"))
-      
-      estimate_i <- as.data.frame(estimate_i)
-      estimate_i <- cbind(estimate_i, Ytest)
-      estimate_i <- cbind(estimate_i, training_time)
-      estimate_i <- cbind(estimate_i, prediction_time)
-      
-      filename <-
-        paste0(data_folder_name, estimator_name,"-", data_name,"-",sampsize, 
-               ".csv")
+      estimate_i <- data.frame(estimator_name, 
+                               data_name,
+                               sampsize,
+                               y_estimate = as.numeric(estimate_i),
+                               y_true = Ytest,
+                               training_time,
+                               prediction_time)
+      filename <- paste0(data_folder_name, estimator_name,"-", data_name,"-",sampsize, ".csv")
       
       col.names <- !file.exists(filename)
       
