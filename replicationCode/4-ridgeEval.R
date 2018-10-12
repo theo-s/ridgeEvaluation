@@ -93,7 +93,7 @@ for (sampsize in samplesize_grid) {
           }
           
           training_time_start <- Sys.time()
-          if (length(formals(estimator)) == 3) {
+          if (substr(estimator_name, 1, 5) == "ridge") {
             E <- estimator(Xobs = as.data.frame(Xtrain),
                            Yobs = Ytrain,
                            lambda = l)

@@ -31,7 +31,7 @@ lambdaCrossValidation <- function(x,
       xTest <- x[folds == i,]
       yTest <- y[folds == i]
 
-      rf <- estimator(x, y, l)
+      rf <- estimator(Xobs = xTrain, Yobs = yTrain, lambda = l)
       yPred <- predict(rf, xTest)
 
       mse <- sum((yPred - yTest)^2)
