@@ -84,7 +84,7 @@ for (sampsize in samplesize_grid) {
       estimate_i <-
         tryCatch({
           #If ridge RF, CV select lambda
-          if (length(formals(estimator)) == 3) {
+          if (substr(estimator_name, 1, 5) == "ridge") {
             l <- lambdaCrossValidation(as.data.frame(Xtrain),
                                        Ytrain,
                                        lambdas,

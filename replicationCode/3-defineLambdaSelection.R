@@ -14,18 +14,8 @@ lambdaCrossValidation <- function(x,
   x <- as.data.frame(x)
   nfeatures <- ncol(x)
 
-  if (nrow(x) %% k != 0) {
-    stop("Cannot split observations into selected K folds")
-  }
-
-  mix <- sample(1:nrow(x))
-  fs <- nrow(x) / k
-
-  folds <- data.frame(matrix(ncol = fs, nrow = 0))
-
-  for (i in 1:k) {
-    folds <- rbind(folds, c(mix[(1+(i-1)*fs):(i*fs)]))
-  }
+  x <- x[sample(nrow(x)),]
+  folds <- folds <- cut(seq(1, nrow(x)), breaks = k, labels = FALSE)
 
   results <- data.frame(matrix(ncol = 2, nrow = 0))
 
@@ -35,12 +25,11 @@ lambdaCrossValidation <- function(x,
     mseL <- 0
     for (i in 1:k) {
 
-      foldIndex <- as.vector(folds[1,], mode = "numeric")
-      xTrain <- x[-foldIndex,]
-      yTrain <- y[-foldIndex]
+      xTrain <- x[folds != i,]
+      yTrain <- y[folds != i]
 
-      xTest <- x[foldIndex,]
-      yTest <- y[foldIndex]
+      xTest <- x[folds == i,]
+      yTest <- y[folds == i]
 
       rf <- estimator(x, y, l)
       yPred <- predict(rf, xTest)
