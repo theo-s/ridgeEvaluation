@@ -9,7 +9,7 @@ if (dir.exists("~/Dropbox/ridgeEvaluation/")) {
 }
 
 # install most up to date version of forestry
-devtools::install_github("soerenkuenzel/forestry", ref = "master")
+devtools::install_github("soerenkuenzel/forestry", ref = "SpecifyLinearFeatures")
 
 library(forestry)
 library(ranger)
@@ -33,11 +33,11 @@ set.seed(634801)
 # Output results as .csv
 
 # Set fraction of data set aside for training + several sample sizes used
-samplesize_grid <- 4 * 2^(1:10)
+samplesize_grid <- 4 * 2^(3:7)
 
 
 # Fold # and lambda list for CV
-lambdas <- c(1:30) / 10
+lambdas <- c(1:3) / 10
 k <- 5
 
 # Loop through all datset, estimator combination

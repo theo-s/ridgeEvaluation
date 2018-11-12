@@ -1,3 +1,10 @@
+library(forestry)
+library(ranger)
+library(glmnet)
+library(ggplot2)
+library(tidyverse)
+library(reshape)
+
 if (dir.exists("~/Dropbox/ridgeEvaluation/")) {
   setwd("~/Dropbox/ridgeEvaluation/")
 } else if (dir.exists("~/ridgeEvaluationCode/")) {
