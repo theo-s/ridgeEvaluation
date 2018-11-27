@@ -9,24 +9,24 @@ estimator_grid <- list(
   "ridge_1" = function(Xobs, Yobs, lambda)
     forestry(Xobs, Yobs, ridgeRF = TRUE, overfitPenalty = lambda),
   "ridge_2" = function(Xobs, Yobs, lambda)
-    forestry(Xobs, Yobs, nodesizeSpl = 10, ridgeRF = TRUE, 
+    forestry(Xobs, Yobs, nodesizeSpl = 25, ridgeRF = TRUE,
              overfitPenalty = lambda),
   "ridge_3" = function(Xobs, Yobs, lambda)
-    forestry(Xobs, Yobs, ntree = 25, nodesizeSpl = 20, ridgeRF = TRUE, 
+    forestry(Xobs, Yobs, ntree = 25, nodesizeSpl = 40, ridgeRF = TRUE,
              overfitPenalty = lambda),
   "ridge_4" = function(Xobs, Yobs, lambda)
-    forestry(Xobs, Yobs, nodesizeSpl = 10, ridgeRF = TRUE, 
+    forestry(Xobs, Yobs, nodesizeSpl = 65, ridgeRF = TRUE,
              overfitPenalty = lambda),
   "ridge_5" = function(Xobs, Yobs, lambda)
-    forestry(Xobs, Yobs, mtry = 3, ridgeRF = TRUE, overfitPenalty = lambda),
-
+    forestry(Xobs, Yobs, mtry = 3, nodesizeSpl = 15, ridgeRF = TRUE, overfitPenalty = lambda),
+  
   "ranger_1" = function(Xobs, Yobs)
     ranger(Yobs ~., data = cbind(Xobs, Yobs)),
   "ranger_2" = function(Xobs, Yobs)
     ranger(Yobs ~., data = cbind(Xobs, Yobs)),
   "ranger_3" = function(Xobs, Yobs)
     ranger(Yobs ~., data = cbind(Xobs, Yobs)),
-
+  
   "glmnet_1" = function(Xobs, Yobs)
     glmnet(x = data.matrix(Xobs), y = Yobs, alpha = 1),
   "glmnet_2" = function(Xobs, Yobs)
