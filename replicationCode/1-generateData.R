@@ -63,9 +63,9 @@ datasets_grid <- list()
 bike <- read.csv("replicationCode/bike.csv", header = TRUE)
 bike <- bike[1:8200,-17]
 
-bike_x <- bike[,-16]
+bike_x <- bike[,c(-1, -2, -16)]
 bike_y <- bike[,16]
-n_bike <- nrow(bike)
+n_bike <- nrow(bike_x)
 
 test_id <- sort(sample(n_bike, size = n_bike/2))
 train_id <- (1:n_bike)[!(1:n_bike) %in% test_id]
@@ -73,7 +73,8 @@ train_id <- (1:n_bike)[!(1:n_bike) %in% test_id]
 ridge <- forestry(x = bike_x, y = bike_y, nodesizeStrictSpl = 25, ridgeRF = TRUE, 
                   overfitPenalty = 1.5)
 
-imputed_y <- predict(ridge, bike_x) + rnorm(nrow(bike_x), sd = 2)
+
+imputed_y <- predict(ridge, bike_x) + rnorm(nrow(bike_x), sd = 10)
 
 ridge_simulated_data <- data.frame(bike_x, y = imputed_y)
 
@@ -82,10 +83,11 @@ datasets_grid[["Bike-LM-RF-smooth"]] <- list(
   "test" = ridge_simulated_data[test_id, ])
 
 #   Model 6: Large LM-RF Hybrid small leaves and low penalty
-ridge <- forestry(x = bike_x, y = bike_y, nodesizeStrictSpl = 10, ridgeRF = TRUE, 
-                  overfitPenalty = .3)
+ridge <- forestry(x = bike_x, y = bike_y, nodesizeStrictSpl = 5, ridgeRF = TRUE, 
+                  overfitPenalty = .5)
 
-imputed_y <- predict(ridge, bike_x) + rnorm(nrow(bike_x), sd = 2)
+
+imputed_y <- predict(ridge, bike_x) + rnorm(nrow(bike_x), sd = 15)
 
 ridge_simulated_data <- data.frame(bike_x, y = imputed_y)
 
@@ -100,14 +102,14 @@ n_train <- 5000
 n_test <- 5000
 n <- n_train + n_test
 p <- 8
-nonlinear.feats <- 6
+nonlinear.feats <- 5
 
 b <- matrix(runif(p,-1, 1), nrow = p, ncol = 1)
 b[sample(1:p, nonlinear.feats),] = 0
 
 x <- matrix(rnorm(p * n), nrow = n, ncol = p)
 
-y <- x %*% b + rnorm(n)
+y <- x %*% b + rnorm(n, sd = 2)
 x <- as.data.frame(x)
 lm_artificial_ds <- cbind(x, y)
 
@@ -116,7 +118,8 @@ datasets_grid[["artificial-LM"]] <- list(
   "test" = lm_artificial_ds[(n_train + 1):(n_train + n_test), ])
 
 x <- matrix(runif(5 * n), nrow = n, ncol = 5)
-y <- 10*sin(pi*x[,1]*x[,2]) + 20*(x[,3] - .5)^2 + 10*x[,4] + 5*x[,5] + rnorm(n, sd = 2)
+x <- as.data.frame(x)
+y <- 10*sin(pi*x[,1]*x[,2]) + 20*(x[,3] - .5)^2 + 10*x[,4] + 5*x[,5] + rnorm(n, sd = 10)
 semilinear_1 <- cbind(x, y)
 
 datasets_grid[["artificial-semilinear_1"]] <- list(
@@ -124,7 +127,8 @@ datasets_grid[["artificial-semilinear_1"]] <- list(
   "test" = semilinear_1[(n_train + 1):(n_train + n_test), ])
 
 x <- matrix(runif(3 * n), nrow = n, ncol = 3)
-y <- 10*x[,1] + 5*(x[,2])^2 + (x[,3])^3 + rnorm(n, sd = 2)
+x <- as.data.frame(x)
+y <- 10*x[,1] + 5*(x[,2])^2 + (x[,3])^3 + rnorm(n, sd = 5)
 semilinear_2 <- cbind(x, y)
 
 datasets_grid[["artificial-semilinear_2"]] <- list(

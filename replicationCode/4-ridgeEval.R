@@ -4,6 +4,8 @@ if (dir.exists("~/Dropbox/ridgeEvaluation/")) {
   setwd("~/ridgeEvaluationCode/")
 } else if (dir.exists("~/ridgeEvaluation/")) {
   setwd("~/ridgeEvaluation/")
+} else if (dir.exists("/accounts/projects/sekhon/theo_s/gdrive/ridgeEvaluation")) {
+  setwd("/accounts/projects/sekhon/theo_s/gdrive/ridgeEvaluation")
 } else {
   stop("wd was not set correctly")
 }
@@ -14,6 +16,7 @@ devtools::install_github("soerenkuenzel/forestry", ref = "SpecifyLinearFeatures"
 library(forestry)
 library(ranger)
 library(glmnet)
+library(grf)
 library(tidyverse)
 library(reshape)
 
@@ -33,12 +36,14 @@ set.seed(634801)
 # Output results as .csv
 
 # Set fraction of data set aside for training + several sample sizes used
-samplesize_grid <- 4 * 2^(3:7)
+samplesize_grid <- 4 * 2^(6:10)
 
 
-# Fold # and lambda list for CV
-lambdas <- c(1:3) / 10
-k <- 5
+# Fold # and lambda list for CV 
+# lambdas <- c(.1, .5, 1)
+lambdas <- c(1:15) / 10
+k <- 4
+
 
 # Loop through all datset, estimator combination
 for (sampsize in samplesize_grid) {
@@ -52,7 +57,7 @@ for (sampsize in samplesize_grid) {
     
     print(paste("Dataset =", data_name, 
                 "and smpsize =", sampsize))
-  
+    
     data_train <- datasets_grid[[dataset_i]][["train"]][1:sampsize,]
     data_test <- datasets_grid[[dataset_i]][["test"]]
     
@@ -79,10 +84,10 @@ for (sampsize in samplesize_grid) {
         print("File already exists. Running next file!")
         next()
       }
-
+      
       training_time <- prediction_time <- NA
       estimate_i <-
-        tryCatch({
+        tryCatch( {
           #If ridge RF, CV select lambda
           if (substr(estimator_name, 1, 5) == "ridge") {
             l <- lambdaCrossValidation(as.data.frame(Xtrain),
@@ -90,6 +95,7 @@ for (sampsize in samplesize_grid) {
                                        lambdas,
                                        k,
                                        estimator)
+            print(l)
           }
           
           training_time_start <- Sys.time()
@@ -138,7 +144,7 @@ for (sampsize in samplesize_grid) {
         col.names = col.names,
         row.names = FALSE,
         sep = ","
-        )
+      )
     }
   }
 }
