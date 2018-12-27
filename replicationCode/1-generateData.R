@@ -101,7 +101,24 @@ set.seed(776291)
 n_train <- 5000
 n_test <- 5000
 n <- n_train + n_test
-p <- 8
+
+p <- 5
+nonlinear.feats <- 3
+
+b <- matrix(runif(p,-1, 1), nrow = p, ncol = 1)
+b[sample(1:p, nonlinear.feats),] = 0
+
+x <- matrix(rnorm(p * n), nrow = n, ncol = p)
+
+y <- x %*% b + rnorm(n, sd = 2)
+x <- as.data.frame(x)
+lm_artificial_ds <- cbind(x, y)
+
+datasets_grid[["artificial-LM-Small"]] <- list(
+  "train" = lm_artificial_ds[1:n_train, ], 
+  "test" = lm_artificial_ds[(n_train + 1):(n_train + n_test), ])
+
+p <- 10
 nonlinear.feats <- 5
 
 b <- matrix(runif(p,-1, 1), nrow = p, ncol = 1)
@@ -113,7 +130,23 @@ y <- x %*% b + rnorm(n, sd = 2)
 x <- as.data.frame(x)
 lm_artificial_ds <- cbind(x, y)
 
-datasets_grid[["artificial-LM"]] <- list(
+datasets_grid[["artificial-LM-Medium"]] <- list(
+  "train" = lm_artificial_ds[1:n_train, ], 
+  "test" = lm_artificial_ds[(n_train + 1):(n_train + n_test), ])
+
+p <- 15
+nonlinear.feats <- 8
+
+b <- matrix(runif(p,-1, 1), nrow = p, ncol = 1)
+b[sample(1:p, nonlinear.feats),] = 0
+
+x <- matrix(rnorm(p * n), nrow = n, ncol = p)
+
+y <- x %*% b + rnorm(n, sd = 2)
+x <- as.data.frame(x)
+lm_artificial_ds <- cbind(x, y)
+
+datasets_grid[["artificial-LM-Large"]] <- list(
   "train" = lm_artificial_ds[1:n_train, ], 
   "test" = lm_artificial_ds[(n_train + 1):(n_train + n_test), ])
 
@@ -137,3 +170,4 @@ datasets_grid[["artificial-semilinear_2"]] <- list(
 
 
 str(datasets_grid)
+

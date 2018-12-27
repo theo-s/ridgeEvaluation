@@ -2,39 +2,46 @@ library(forestry)
 library(ranger)
 library(glmnet)
 library(grf)
+library(Cubist)
 library(ggplot2)
 
 # Define all estimators:
 
 estimator_grid <- list(
   "ridge_1" = function(Xobs, Yobs, lambda)
-    forestry(Xobs, Yobs, ridgeRF = TRUE, mtry = 3, overfitPenalty = lambda),
+    forestry(Xobs, Yobs, ridgeRF = TRUE, nodesizeSpl = 250, mtry = 3, overfitPenalty = lambda),
   "ridge_2" = function(Xobs, Yobs, lambda)
     forestry(Xobs, Yobs, nodesizeSpl = 25, mtry = 3, ridgeRF = TRUE, overfitPenalty = lambda),
   "ridge_3" = function(Xobs, Yobs, lambda)
     forestry(Xobs, Yobs, ntree = 80, nodesizeSpl = 40, mtry = 5, ridgeRF = TRUE, overfitPenalty = lambda),
   "ridge_4" = function(Xobs, Yobs, lambda)
-    forestry(Xobs, Yobs, nodesizeSpl = 80, ridgeRF = TRUE, overfitPenalty = lambda),
+    forestry(Xobs, Yobs, nodesizeSpl = 100, ridgeRF = TRUE, overfitPenalty = lambda),
   "ridge_5" = function(Xobs, Yobs, lambda)
     forestry(Xobs, Yobs, mtry = 3, nodesizeSpl = 15, ridgeRF = TRUE, overfitPenalty = lambda),
   "ridge_6" = function(Xobs, Yobs, lambda)
     forestry(Xobs, Yobs, ridgeRF = TRUE, overfitPenalty = 10000),
+  "ridge_7" = function(Xobs, Yobs, lambda)
+    forestry(Xobs, Yobs, ridgeRF = TRUE, nodesizeSpl = 300, mtry = 4, overfitPenalty = lambda),
+  "ridge_8" = function(Xobs, Yobs, lambda)
+    forestry(Xobs, Yobs, ridgeRF = TRUE, nodesizeSpl = 500, mtry = 2, overfitPenalty = lambda),
+  "ridge_9" = function(Xobs, Yobs, lambda)
+    forestry(Xobs, Yobs, ridgeRF = TRUE, nodesizeSpl = 150, mtry = 3, overfitPenalty = lambda),
   
   "forestry_1" = function(Xobs, Yobs, lambda)
-    forestry(Xobs, Yobs, mtry = 3),
+    forestry(Xobs, Yobs, nodesizeSpl = 250, mtry = 3),
   "forestry_2" = function(Xobs, Yobs, lambda)
     forestry(Xobs, Yobs, nodesizeSpl = 25, mtry = 3),
   "forestry_3" = function(Xobs, Yobs, lambda)
     forestry(Xobs, Yobs, ntree = 80, nodesizeSpl = 40, mtry = 5),
   "forestry_4" = function(Xobs, Yobs, lambda)
-    forestry(Xobs, Yobs, nodesizeSpl = 80),
+    forestry(Xobs, Yobs, nodesizeSpl = 100),
   "forestry_5" = function(Xobs, Yobs, lambda)
     forestry(Xobs, Yobs, mtry = 3, nodesizeSpl = 15),
   "forestry_6" = function(Xobs, Yobs, lambda)
     forestry(Xobs, Yobs),
   
   "ranger_1" = function(Xobs, Yobs)
-    ranger(Yobs ~., data = cbind(Xobs, Yobs), mtry = 3),
+    ranger(Yobs ~., data = cbind(Xobs, Yobs), min.node.size = 250, mtry = 3),
   "ranger_2" = function(Xobs, Yobs)
     ranger(Yobs ~., data = cbind(Xobs, Yobs), min.node.size = 25, mtry = 3),
   "ranger_3" = function(Xobs, Yobs)
@@ -52,7 +59,7 @@ estimator_grid <- list(
     glmnet(x = data.matrix(Xobs), y = Yobs, alpha = .5),
   
   "local_RF_1" = function(Xobs, Yobs)
-    local_linear_forest(X = Xobs, Y = Yobs, num.trees = 500, mtry = 3),
+    local_linear_forest(X = Xobs, Y = Yobs, num.trees = 500, min.node.size = 250, mtry = 3),
   "local_RF_2" = function(Xobs, Yobs)
     local_linear_forest(X = Xobs, Y = Yobs, num.trees = 500, min.node.size = 25, mtry = 3),
   "local_RF_3" = function(Xobs, Yobs)
@@ -60,7 +67,18 @@ estimator_grid <- list(
   "local_RF_4" = function(Xobs, Yobs)
     local_linear_forest(X = Xobs, Y = Yobs, num.trees = 500, min.node.size = 80),
   "local_RF_5" = function(Xobs, Yobs)
-    local_linear_forest(X = Xobs, Y = Yobs, num.trees = 500, min.node.size = 15, mtry = 3)
+    local_linear_forest(X = Xobs, Y = Yobs, num.trees = 500, min.node.size = 15, mtry = 3),
+  "local_RF_6" = function(Xobs, Yobs)
+    local_linear_forest(X = Xobs, Y = Yobs, num.trees = 500, min.node.size = 3),
+  "local_RF_7" = function(Xobs, Yobs)
+    local_linear_forest(X = Xobs, Y = Yobs, num.trees = 500, min.node.size = 300, mtry = 4),
+  "local_RF_8" = function(Xobs, Yobs)
+    local_linear_forest(X = Xobs, Y = Yobs, num.trees = 500, min.node.size = 500, mtry = 2),
+  "local_RF_9" = function(Xobs, Yobs)
+    local_linear_forest(X = Xobs, Y = Yobs, num.trees = 500, min.node.size = 150, mtry = 3),
+  
+  "cubist_1" = function(Xobs, Yobs)
+    cubist(x = Xobs, y = Yobs)
 )
 
 
@@ -81,6 +99,18 @@ predictor_grid <- list(
     return(predict(estimator, feat))
   },
   "ridge_6" = function(estimator, feat) {
+    return(predict(estimator, feat))
+  },
+  "ridge_7" = function(estimator, feat) {
+    return(predict(estimator, feat))
+  },
+  "ridge_8" = function(estimator, feat) {
+    return(predict(estimator, feat))
+  },
+  "ridge_9" = function(estimator, feat) {
+    return(predict(estimator, feat))
+  },
+  "ridge_10" = function(estimator, feat) {
     return(predict(estimator, feat))
   },
   
@@ -148,5 +178,25 @@ predictor_grid <- list(
   },
   "local_RF_5" = function(estimator, feat) {
     return(predict(estimator, newdata = feat)$predictions)
+  },
+  "local_RF_6" = function(estimator, feat) {
+    return(predict(estimator, newdata = feat)$predictions)
+  },
+  "local_RF_7" = function(estimator, feat) {
+    return(predict(estimator, newdata = feat)$predictions)
+  },
+  "local_RF_8" = function(estimator, feat) {
+    return(predict(estimator, newdata = feat)$predictions)
+  },
+  "local_RF_9" = function(estimator, feat) {
+    return(predict(estimator, newdata = feat)$predictions)
+  },
+  "local_RF_10" = function(estimator, feat) {
+    return(predict(estimator, newdata = feat)$predictions)
+  },
+  
+  "cubist_1" = function(estimator, feat) {
+    return(predict(estimator, feat))
   }
+  
 )

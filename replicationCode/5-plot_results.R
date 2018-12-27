@@ -41,6 +41,7 @@ for (ds_name in as.character(unique(full_data$data_name))) {
     ggplot(aes(x = sampsize, y = MSE, color = estimator_name)) +
     geom_line() +
     scale_y_log10() +
+    theme_bw() +
     geom_text(aes(label = estimator_name))
   
   ggsave(p_l, file = paste0("figures/", ds_name, ".pdf"), width = 10, height = 8)
