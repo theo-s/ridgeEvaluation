@@ -4,80 +4,98 @@ library(glmnet)
 library(grf)
 library(Cubist)
 library(ggplot2)
+library(caret)
 
 # Define all estimators:
 
 estimator_grid <- list(
-  "ridge_1" = function(Xobs, Yobs, lambda)
-    forestry(Xobs, Yobs, ridgeRF = TRUE, nodesizeSpl = 250, mtry = 3, overfitPenalty = lambda),
-  "ridge_2" = function(Xobs, Yobs, lambda)
-    forestry(Xobs, Yobs, nodesizeSpl = 25, mtry = 3, ridgeRF = TRUE, overfitPenalty = lambda),
-  "ridge_3" = function(Xobs, Yobs, lambda)
-    forestry(Xobs, Yobs, ntree = 80, nodesizeSpl = 40, mtry = 5, ridgeRF = TRUE, overfitPenalty = lambda),
-  "ridge_4" = function(Xobs, Yobs, lambda)
-    forestry(Xobs, Yobs, nodesizeSpl = 100, ridgeRF = TRUE, overfitPenalty = lambda),
-  "ridge_5" = function(Xobs, Yobs, lambda)
-    forestry(Xobs, Yobs, mtry = 3, nodesizeSpl = 15, ridgeRF = TRUE, overfitPenalty = lambda),
-  "ridge_6" = function(Xobs, Yobs, lambda)
-    forestry(Xobs, Yobs, ridgeRF = TRUE, overfitPenalty = 10000),
-  "ridge_7" = function(Xobs, Yobs, lambda)
-    forestry(Xobs, Yobs, ridgeRF = TRUE, nodesizeSpl = 300, mtry = 4, overfitPenalty = lambda),
-  "ridge_8" = function(Xobs, Yobs, lambda)
-    forestry(Xobs, Yobs, ridgeRF = TRUE, nodesizeSpl = 500, mtry = 2, overfitPenalty = lambda),
-  "ridge_9" = function(Xobs, Yobs, lambda)
-    forestry(Xobs, Yobs, ridgeRF = TRUE, nodesizeSpl = 150, mtry = 3, overfitPenalty = lambda),
+  "tunedRidgeRF" = function(Xobs, Yobs) {
+    ridgeRF <- list(type = "Regression",
+                    library = "forestry",
+                    loop = NULL) 
+    
+    params <- data.frame(parameter = c("mtry", "nodesizeSpl", "overfitPenalty"),
+                         class = rep("numeric", 3),
+                         label = c("mtry", "nodesizeSpl", "overfitPenalty"))
+    
+    ridgeGrid <- function(x, y, len = 1, search = "random") {
+      ## Define ranges for the parameters and
+      ## generate random values for them
+      
+      grid <- data.frame(mtry = sample(1:ncol(x), 
+                                       len, 
+                                       replace = TRUE),
+                         nodesizeSpl = ceiling(exp(runif(len, 
+                                                         min = log(5),
+                                                         max = log(.25*nrow(x))))),
+                         # Might want to pass specific range/distribution for lambdas ?? 
+                         overfitPenalty = exp(runif(len, 
+                                                    min = log(.05), 
+                                                    max = log(15)))
+      )
+      grid
+    }
+    
+    ridgeFit <- function(x, y, wts, param, lev = NULL, last, weights, classProbs) { 
+      forestry(x = x, 
+               y = y, 
+               ridgeRF = TRUE, 
+               nodesizeSpl = param$nodesizeSpl, 
+               nodesizeStrictSpl = 1,
+               mtry = param$mtry, 
+               overfitPenalty = param$overfitPenalty)
+    }
+    
+    ridgePred <- function(modelFit, newdata, preProc = NULL, submodels = NULL) {
+      predict(modelFit, newdata)
+    }
+    
+    ridgeProb <- function(modelFit, newdata, preProc = NULL, submodels = NULL) {
+      foresty::predict(modelFit, newdata, type = "probabilities")
+    }
+    
+    
+    ridgeRF$parameters <- params
+    ridgeRF$grid <- ridgeGrid
+    ridgeRF$fit <- ridgeFit
+    ridgeRF$predict <- ridgePred
+    ridgeRF$prob <- ridgeProb
+    
+    fitControl <- trainControl(method = "repeatedcv",
+                               ## 5-fold CV
+                               number = 10,
+                               ## repeated 5 times
+                               repeats = 10,
+                               adaptive = list(min = 5, alpha = 0.05, 
+                                               method = "gls", complete = TRUE)
+    )
+    
+    rf <- train(Yobs ~.,
+                data = cbind(Xobs, Yobs), 
+                method = ridgeRF,
+                metric = "RMSE",
+                tuneLength = 10,
+                trControl = fitControl)
+    rf
+  },
   
-  "forestry_1" = function(Xobs, Yobs, lambda)
-    forestry(Xobs, Yobs, nodesizeSpl = 250, mtry = 3),
-  "forestry_2" = function(Xobs, Yobs, lambda)
-    forestry(Xobs, Yobs, nodesizeSpl = 25, mtry = 3),
-  "forestry_3" = function(Xobs, Yobs, lambda)
-    forestry(Xobs, Yobs, ntree = 80, nodesizeSpl = 40, mtry = 5),
-  "forestry_4" = function(Xobs, Yobs, lambda)
-    forestry(Xobs, Yobs, nodesizeSpl = 100),
-  "forestry_5" = function(Xobs, Yobs, lambda)
-    forestry(Xobs, Yobs, mtry = 3, nodesizeSpl = 15),
-  "forestry_6" = function(Xobs, Yobs, lambda)
+
+  "forestry" = function(Xobs, Yobs, lambda)
     forestry(Xobs, Yobs),
   
-  "ranger_1" = function(Xobs, Yobs)
-    ranger(Yobs ~., data = cbind(Xobs, Yobs), min.node.size = 250, mtry = 3),
-  "ranger_2" = function(Xobs, Yobs)
-    ranger(Yobs ~., data = cbind(Xobs, Yobs), min.node.size = 25, mtry = 3),
-  "ranger_3" = function(Xobs, Yobs)
-    ranger(Yobs ~., data = cbind(Xobs, Yobs), num.trees = 80, min.node.size = 40, mtry = 5),
-  "ranger_4" = function(Xobs, Yobs)
-    ranger(Yobs ~., data = cbind(Xobs, Yobs), min.node.size = 80),
-  "ranger_5" = function(Xobs, Yobs)
-    ranger(Yobs ~., data = cbind(Xobs, Yobs), min.node.size = 15, mtry = 3),
+  "ranger" = function(Xobs, Yobs)
+    ranger(Yobs ~., data = cbind(Xobs, Yobs)),
+
   
-  "glmnet_1" = function(Xobs, Yobs)
-    glmnet(x = data.matrix(Xobs), y = Yobs, alpha = 1),
-  "glmnet_2" = function(Xobs, Yobs)
-    glmnet(x = data.matrix(Xobs), y = Yobs, alpha = 0),
-  "glmnet_3" = function(Xobs, Yobs)
-    glmnet(x = data.matrix(Xobs), y = Yobs, alpha = .5),
+  "glmnet" = function(Xobs, Yobs)
+    glmnet(x = data.matrix(Xobs), y = Yobs),
+
   
-  "local_RF_1" = function(Xobs, Yobs)
-    local_linear_forest(X = Xobs, Y = Yobs, num.trees = 500, min.node.size = 250, mtry = 3),
-  "local_RF_2" = function(Xobs, Yobs)
-    local_linear_forest(X = Xobs, Y = Yobs, num.trees = 500, min.node.size = 25, mtry = 3),
-  "local_RF_3" = function(Xobs, Yobs)
-    local_linear_forest(X = Xobs, Y = Yobs, num.trees = 80, min.node.size = 40, mtry = 5),
-  "local_RF_4" = function(Xobs, Yobs)
-    local_linear_forest(X = Xobs, Y = Yobs, num.trees = 500, min.node.size = 80),
-  "local_RF_5" = function(Xobs, Yobs)
-    local_linear_forest(X = Xobs, Y = Yobs, num.trees = 500, min.node.size = 15, mtry = 3),
-  "local_RF_6" = function(Xobs, Yobs)
-    local_linear_forest(X = Xobs, Y = Yobs, num.trees = 500, min.node.size = 3),
-  "local_RF_7" = function(Xobs, Yobs)
-    local_linear_forest(X = Xobs, Y = Yobs, num.trees = 500, min.node.size = 300, mtry = 4),
-  "local_RF_8" = function(Xobs, Yobs)
-    local_linear_forest(X = Xobs, Y = Yobs, num.trees = 500, min.node.size = 500, mtry = 2),
-  "local_RF_9" = function(Xobs, Yobs)
-    local_linear_forest(X = Xobs, Y = Yobs, num.trees = 500, min.node.size = 150, mtry = 3),
+  "local_RF" = function(Xobs, Yobs)
+    local_linear_forest(X = Xobs, Y = Yobs, num.trees = 500),
+
   
-  "cubist_1" = function(Xobs, Yobs)
+  "cubist" = function(Xobs, Yobs)
     cubist(x = Xobs, y = Yobs)
 )
 
