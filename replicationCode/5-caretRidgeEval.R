@@ -21,13 +21,13 @@ library(tidyverse)
 library(reshape)
 library(Cubist)
 library(caret)
+library(rBayesianOptimization)
 
 data_folder_name <- "replicationCode/estimates/"
 dir.create(data_folder_name, showWarnings = FALSE)
 
 source("replicationCode/1-generateData.R")
 source("replicationCode/2-generateEstimators.R")
-source("replicationCode/3-defineLambdaSelection.R")
 
 set.seed(634801)
 
@@ -38,7 +38,7 @@ set.seed(634801)
 # Output results as .csv
 
 # Set fraction of data set aside for training + several sample sizes used
-samplesize_grid <- 4 * 2^(6:10)
+samplesize_grid <- 4 * 2^(5)
 
 # Loop through all datset, estimator combination
 for (sampsize in samplesize_grid) {
@@ -75,14 +75,28 @@ for (sampsize in samplesize_grid) {
       filename <-
         paste0(data_folder_name, estimator_name,"-", data_name,"-",sampsize, 
                ".csv")
+      
+      if (substr(estimator_name, 1, 5) == "caret") {
+        filenamer <-
+          paste0(data_folder_name,"random", estimator_name,"-", data_name,"-",sampsize, 
+                 ".csv")
+        filenameb <-
+          paste0(data_folder_name,"bayes", estimator_name,"-", data_name,"-",sampsize, 
+                 ".csv")
+      }
+      
       if (file.exists(filename)) {
         print("File already exists. Running next file!")
         next()
       }
       
-      paramFilename <-
+      random_params <-
         paste0(data_folder_name, estimator_name,"-", data_name,"-",sampsize,"-",
-               "hyperparameters",".rds")
+               "random",".rds")
+      
+      bayes_params <- 
+        paste0(data_folder_name, estimator_name,"-", data_name,"-",sampsize,"-",
+               "bayes",".rds")
       
       training_time <- prediction_time <- NA
       estimate_i <-
@@ -90,11 +104,18 @@ for (sampsize in samplesize_grid) {
           #If ridge RF, use version tuned with caret and save final parameters
           
           training_time_start <- Sys.time()
-          if (substr(estimator_name, 1, 5) == "ridge") {
-            rf <- estimator(Xobs = as.data.frame(Xtrain),
-                            Yobs = Ytrain)
-            saveRDS(rf, file = paramFilename)
-            E <- rf$finalModel
+          if (substr(estimator_name, 1, 5) == "caret") {
+            E <- estimator(Xobs = as.data.frame(Xtrain),
+                           Yobs = Ytrain)
+            
+            random_rf <- E["random_rf"]
+            saveRDS(rf, file = random_params)
+            
+            bayes_rf <- E["bayes_rf"]
+            saveRDS(rf, file = bayes_params)
+            
+            Er <- random_rf$finalModel
+            Eb <- bayes_rf$finalModel
           } else {
             E <- estimator(Xobs = as.data.frame(Xtrain),
                            Yobs = Ytrain)
@@ -106,12 +127,24 @@ for (sampsize in samplesize_grid) {
                                                units = "mins"))
           
           prediction_time_start <- Sys.time()
-          pdts <- predictor(E, Xtest)
-          prediction_time <- as.numeric(difftime(Sys.time(),
-                                                 prediction_time_start,
-                                                 tz,
-                                                 units = "mins"))
-          pdts
+          
+          if (substr(estimator_name, 1, 5) == "caret") {
+            predr <- predictor(Er, Xtest)
+            predb <- predictor(Eb, Xtest)
+            
+            prediction_time <- as.numeric(difftime(Sys.time(),
+                                                   prediction_time_start,
+                                                   tz,
+                                                   units = "mins"))
+            list("pred_r" = predr, "ored_b" = predb)
+          } else {
+            pdts <- predictor(E, Xtest)
+            prediction_time <- as.numeric(difftime(Sys.time(),
+                                                   prediction_time_start,
+                                                   tz,
+                                                   units = "mins"))
+            pdts
+            }
         },
         error = function(err) {
           print(err)
@@ -119,24 +152,64 @@ for (sampsize in samplesize_grid) {
           return(NA)
         })
       
-      estimate_i <- data.frame(estimator_name, 
-                               data_name,
-                               sampsize,
-                               y_estimate = as.numeric(estimate_i),
-                               y_true = Ytest,
-                               training_time,
-                               prediction_time)
-      filename <- paste0(data_folder_name, estimator_name,"-", data_name,"-",sampsize, ".csv")
-      
-      col.names <- !file.exists(filename)
-      
-      write.table(
-        estimate_i,
-        file = filename,
-        col.names = col.names,
-        row.names = FALSE,
-        sep = ","
-      )
+      if (substr(estimator_name, 1, 5) == "caret") {
+        estimate_ir <- data.frame(estimator_name, 
+                                 data_name,
+                                 sampsize,
+                                 y_estimate = as.numeric(estimate_i["pred_r"]),
+                                 y_true = Ytest,
+                                 training_time,
+                                 prediction_time)
+        filename <- paste0(data_folder_name, estimator_name,"random","-", data_name,"-",sampsize, ".csv")
+        
+        col.names <- !file.exists(filename)
+        
+        write.table(
+          estimate_ir,
+          file = filename,
+          col.names = col.names,
+          row.names = FALSE,
+          sep = ","
+        )
+        
+        estimate_ib <- data.frame(estimator_name, 
+                                  data_name,
+                                  sampsize,
+                                  y_estimate = as.numeric(estimate_i["pred_b"]),
+                                  y_true = Ytest,
+                                  training_time,
+                                  prediction_time)
+        filename <- paste0(data_folder_name, estimator_name,"bayes","-", data_name,"-",sampsize, ".csv")
+        
+        col.names <- !file.exists(filename)
+        
+        write.table(
+          estimate_ib,
+          file = filename,
+          col.names = col.names,
+          row.names = FALSE,
+          sep = ","
+        )
+      } else {
+        estimate_i <- data.frame(estimator_name, 
+                                 data_name,
+                                 sampsize,
+                                 y_estimate = as.numeric(estimate_i),
+                                 y_true = Ytest,
+                                 training_time,
+                                 prediction_time)
+        filename <- paste0(data_folder_name, estimator_name,"-", data_name,"-",sampsize, ".csv")
+        
+        col.names <- !file.exists(filename)
+        
+        write.table(
+          estimate_i,
+          file = filename,
+          col.names = col.names,
+          row.names = FALSE,
+          sep = ","
+        )
+      }
     }
   }
 }

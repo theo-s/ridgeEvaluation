@@ -5,24 +5,25 @@ library(grf)
 library(Cubist)
 library(ggplot2)
 library(caret)
+library(rBayesianOptimization)
 
 # Define all estimators:
 
 estimator_grid <- list(
   "caretRidgeRF" = function(Xobs, Yobs) {
+      
     ridgeRF <- list(type = "Regression",
                     library = "forestry",
                     loop = NULL,
-                    params = data.frame(parameter = c("mtry", "nodesizeStrictSpl", "overfitPenalty"),
-                                        class = rep("numeric", 3),
-                                        label = c("mtry", "nodesizeStrictSpl", "overfitPenalty")),
-                    grid = function(x, y, len = 1, search = "random") {
+                    parameters = data.frame(
+                      parameter = c("mtry", "nodesizeStrictSpl", "overfitPenalty"),
+                      class = rep("numeric", 3),
+                      label = c("mtry", "nodesizeStrictSpl", "overfitPenalty")),
+                    grid = function(x, y, len = NULL, search = "random") {
                       ## Define ranges for the parameters and
                       ## generate random values for them
                       
-                      paramGrid <- data.frame(mtry = sample(1:ncol(x), 
-                                                            len, 
-                                                            replace = TRUE),
+                      paramGrid <- data.frame(mtry = sample(1:ncol(x), size = len, replace = TRUE),
                                               nodesizeStrictSpl = ceiling(exp(runif(len, 
                                                                                     min = log(5),
                                                                                     max = log(.25*nrow(x))))),
@@ -51,24 +52,74 @@ estimator_grid <- list(
                     prob= NULL)
     
     fitControl <- trainControl(method = "repeatedcv",
-                               ## 5-fold CV
-                               number = 10,
+                               ## 10-fold CV
+                               number = 5,
                                ## repeated 5 times
-                               repeats = 10,
-                               adaptive = list(min = 5, alpha = 0.05, 
+                               repeats = 5,
+                               adaptive = list(min = 3, alpha = 0.05, 
                                                method = "gls", complete = TRUE))
     
-    rf <- train(Yobs ~.,
-                data = cbind(Xobs, Yobs), 
-                method = ridgeRF,
-                metric = "RMSE",
-                tuneLength = 10,
-                trControl = fitControl)
-    return(rf)
+    random_rf <- train(Yobs ~.,
+                       data = cbind(Xobs, Yobs), 
+                       method = ridgeRF,
+                       metric = "RMSE",
+                       tuneLength = 10,
+                       trControl = fitControl)
+      
+    ctrl <- trainControl(method = "repeatedcv", repeats = 5)
+    
+    ridge_bayes <- function(mtry, nodesizeStrictSpl, overfitPenalty) {
+    ## Use the same model code but for a single hyperparameter set
+    txt <- capture.output(
+      mod <- train(Yobs ~ .,
+                   data = cbind(Xobs, Yobs),
+                   method = ridgeRF,
+                   metric = "RMSE",
+                   trControl = ctrl,
+                   tuneGrid = data.frame(mtry = mtry, 
+                                         nodesizeStrictSpl = nodesizeStrictSpl,
+                                         overfitPenalty = overfitPenalty))
+      )
+      list(Score = -getTrainPerf(mod)[, "TrainRMSE"], Pred = 0)
+    }
+    
+    lower_bound <- c(mtry = 1, 
+                     nodesizeStrictSpl = 5,
+                     overfitPenalty = .05)
+    upper_bound <- c(mtry = ncol(Xobs), 
+                     nodesizeStrictSpl = .25*nrow(Xobs),
+                     overfitPenalty = 25)
+    bounds <- list(mtry = c(lower_bound[1], upper_bound[1]),
+                   nodesizeStrictSpl = c(lower_bound[2], upper_bound[2]),
+                   overfitPenalty = c(lower_bound[3], upper_bound[3]))
+    
+    initial_grid <- random_rf$results[, c("mtry", "nodesizeStrictSpl", "overfitPenalty", "RMSE")]
+    initial_grid$RMSE <- -initial_grid$RMSE
+    names(initial_grid) <- c("mtry", "nodesizeStrictSpl", "overfitPenalty", "Value")
+    
+    ba_search <- BayesianOptimization(ridge_bayes,
+                                      bounds = bounds,
+                                      init_grid_dt = initial_grid, 
+                                      init_points = 0, 
+                                      n_iter = 30,
+                                      acq = "ucb", 
+                                      kappa = 1, 
+                                      eps = 0.0,
+                                      verbose = TRUE)
+    
+    bayes_rf <- train(Yobs ~ ., 
+                      data = cbind(Xobs, Yobs),
+                      method = ridgeRF,
+                      tuneGrid = data.frame(mtry = ba_search$Best_Par["mtry"], 
+                                            nodesizeStrictSpl = ba_search$Best_Par["nodesizeStrictSpl"],
+                                            overfitPenalty = ba_search$Best_Par["overfitPenalty"]),
+                      metric = "RMSE",
+                      trControl = ctrl)
+    
+    return(list("random_rf" = random_rf, "bayes_rf" = bayes_rf))
   },
   
-  
-  "forestry" = function(Xobs, Yobs, lambda)
+  "forestry" = function(Xobs, Yobs)
     forestry(Xobs, Yobs),
   
   "ranger" = function(Xobs, Yobs)
