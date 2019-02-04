@@ -55,30 +55,30 @@ estimator_grid <- list(
                                ## 10-fold CV
                                number = 5,
                                ## repeated 5 times
-                               repeats = 5,
-                               adaptive = list(min = 3, alpha = 0.05, 
+                               repeats = 2,
+                               adaptive = list(min = 1, alpha = 0.05, 
                                                method = "gls", complete = TRUE))
     
     random_rf <- train(Yobs ~.,
                        data = cbind(Xobs, Yobs), 
                        method = ridgeRF,
                        metric = "RMSE",
-                       tuneLength = 10,
+                       tuneLength = 3,
                        trControl = fitControl)
-      
+    
     ctrl <- trainControl(method = "repeatedcv", repeats = 5)
     
     ridge_bayes <- function(mtry, nodesizeStrictSpl, overfitPenalty) {
-    ## Use the same model code but for a single hyperparameter set
-    txt <- capture.output(
-      mod <- train(Yobs ~ .,
-                   data = cbind(Xobs, Yobs),
-                   method = ridgeRF,
-                   metric = "RMSE",
-                   trControl = ctrl,
-                   tuneGrid = data.frame(mtry = mtry, 
-                                         nodesizeStrictSpl = nodesizeStrictSpl,
-                                         overfitPenalty = overfitPenalty))
+      ## Use the same model code but for a single hyperparameter set
+      txt <- capture.output(
+        mod <- train(Yobs ~ .,
+                     data = cbind(Xobs, Yobs),
+                     method = ridgeRF,
+                     metric = "RMSE",
+                     trControl = ctrl,
+                     tuneGrid = data.frame(mtry = ceiling(mtry), 
+                                           nodesizeStrictSpl = ceiling(nodesizeStrictSpl),
+                                           overfitPenalty = overfitPenalty))
       )
       list(Score = -getTrainPerf(mod)[, "TrainRMSE"], Pred = 0)
     }
@@ -101,7 +101,7 @@ estimator_grid <- list(
                                       bounds = bounds,
                                       init_grid_dt = initial_grid, 
                                       init_points = 0, 
-                                      n_iter = 30,
+                                      n_iter = 3,
                                       acq = "ucb", 
                                       kappa = 1, 
                                       eps = 0.0,
@@ -110,13 +110,14 @@ estimator_grid <- list(
     bayes_rf <- train(Yobs ~ ., 
                       data = cbind(Xobs, Yobs),
                       method = ridgeRF,
-                      tuneGrid = data.frame(mtry = ba_search$Best_Par["mtry"], 
-                                            nodesizeStrictSpl = ba_search$Best_Par["nodesizeStrictSpl"],
+                      tuneGrid = data.frame(mtry = ceiling(ba_search$Best_Par["mtry"]), 
+                                            nodesizeStrictSpl = ceiling(ba_search$Best_Par["nodesizeStrictSpl"]),
                                             overfitPenalty = ba_search$Best_Par["overfitPenalty"]),
                       metric = "RMSE",
                       trControl = ctrl)
     
-    return(list("random_rf" = random_rf, "bayes_rf" = bayes_rf))
+    return(list("random_rf" = random_rf$finalModel, 
+                "bayes_rf" = bayes_rf$finalModel))
   },
   
   "forestry" = function(Xobs, Yobs)

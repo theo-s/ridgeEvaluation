@@ -43,7 +43,7 @@ samplesize_grid <- 4 * 2^(5)
 # Loop through all datset, estimator combination
 for (sampsize in samplesize_grid) {
   for (dataset_i in 1:length(datasets_grid)) {
-    # sampsize = 128; dataset_i = 2
+    # sampsize = 128; dataset_i = 1
     data_name <- names(datasets_grid)[dataset_i]
     
     if (sampsize > nrow(datasets_grid[[dataset_i]][["train"]])) {
@@ -108,14 +108,12 @@ for (sampsize in samplesize_grid) {
             E <- estimator(Xobs = as.data.frame(Xtrain),
                            Yobs = Ytrain)
             
-            random_rf <- E["random_rf"]
-            saveRDS(rf, file = random_params)
+            Er <- E["random_rf"]
+            #saveRDS(random_rf, file = random_params)
             
-            bayes_rf <- E["bayes_rf"]
-            saveRDS(rf, file = bayes_params)
+            Eb <- E["bayes_rf"]
+            #saveRDS(bayes_rf, file = bayes_params)
             
-            Er <- random_rf$finalModel
-            Eb <- bayes_rf$finalModel
           } else {
             E <- estimator(Xobs = as.data.frame(Xtrain),
                            Yobs = Ytrain)
@@ -136,7 +134,7 @@ for (sampsize in samplesize_grid) {
                                                    prediction_time_start,
                                                    tz,
                                                    units = "mins"))
-            list("pred_r" = predr, "ored_b" = predb)
+            list("random" = predr, "bayes" = predb)
           } else {
             pdts <- predictor(E, Xtest)
             prediction_time <- as.numeric(difftime(Sys.time(),
@@ -153,43 +151,27 @@ for (sampsize in samplesize_grid) {
         })
       
       if (substr(estimator_name, 1, 5) == "caret") {
-        estimate_ir <- data.frame(estimator_name, 
-                                 data_name,
-                                 sampsize,
-                                 y_estimate = as.numeric(estimate_i["pred_r"]),
-                                 y_true = Ytest,
-                                 training_time,
-                                 prediction_time)
-        filename <- paste0(data_folder_name, estimator_name,"random","-", data_name,"-",sampsize, ".csv")
-        
-        col.names <- !file.exists(filename)
-        
-        write.table(
-          estimate_ir,
-          file = filename,
-          col.names = col.names,
-          row.names = FALSE,
-          sep = ","
-        )
-        
-        estimate_ib <- data.frame(estimator_name, 
-                                  data_name,
-                                  sampsize,
-                                  y_estimate = as.numeric(estimate_i["pred_b"]),
-                                  y_true = Ytest,
-                                  training_time,
-                                  prediction_time)
-        filename <- paste0(data_folder_name, estimator_name,"bayes","-", data_name,"-",sampsize, ".csv")
-        
-        col.names <- !file.exists(filename)
-        
-        write.table(
-          estimate_ib,
-          file = filename,
-          col.names = col.names,
-          row.names = FALSE,
-          sep = ","
-        )
+        for (tune in c("random", "bayes")) {
+          estimate_ir <- data.frame(paste(tune, estimator_name, sep = ""), 
+                                   data_name,
+                                   sampsize,
+                                   y_estimate = estimate_i[tune],
+                                   y_true = Ytest,
+                                   training_time,
+                                   prediction_time)
+          filename <- paste0(data_folder_name,tune,estimator_name,"-", data_name,"-",sampsize, ".csv")
+          
+          col.names <- !file.exists(filename)
+          
+          write.table(
+            estimate_ir,
+            file = filename,
+            col.names = c("estimator_name","data_name","sampsize","y_estimate","y_true","training_time","prediction_time"),
+            row.names = FALSE,
+            sep = ","
+          )
+        }
+          
       } else {
         estimate_i <- data.frame(estimator_name, 
                                  data_name,
@@ -213,3 +195,4 @@ for (sampsize in samplesize_grid) {
     }
   }
 }
+
