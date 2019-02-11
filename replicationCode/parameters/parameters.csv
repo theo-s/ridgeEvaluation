@@ -1,0 +1,7 @@
+dataset,n,mtry,nodesizeStrictSpl,overfitPenalty
+artificial-LM-Medium,2048,2,311,0.072993643
+artificial-LM-Medium,4096,1,797,5.505783826
+artificial-semilinear_1,2048,3,69,0.104684863
+artificial-semilinear_1,4096,4,377,0.577065864
+Bike-LM-RF-spiky,2048,10,15,0.090451306
+Bike-LM-RF-spiky,4096,11,13,0.08816209

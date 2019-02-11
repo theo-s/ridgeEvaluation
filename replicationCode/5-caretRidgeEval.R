@@ -26,7 +26,7 @@ library(rBayesianOptimization)
 data_folder_name <- "replicationCode/estimates/"
 dir.create(data_folder_name, showWarnings = FALSE)
 
-source("replicationCode/1-generateData.R")
+source("replicationCode/generateLimitedData.R")
 source("replicationCode/2-generateEstimators.R")
 
 set.seed(634801)
@@ -38,7 +38,7 @@ set.seed(634801)
 # Output results as .csv
 
 # Set fraction of data set aside for training + several sample sizes used
-samplesize_grid <- 4 * 2^(5)
+samplesize_grid <- 4 * 2^(10)
 
 # Loop through all datset, estimator combination
 for (sampsize in samplesize_grid) {
@@ -85,14 +85,14 @@ for (sampsize in samplesize_grid) {
                  ".csv")
       }
       
-      if (file.exists(filename)) {
-        print("File already exists. Running next file!")
-        next()
-      }
+      # if (file.exists(filename) || file.exists(filenamer) || file.exists(filenameb) ) {
+      #   print("File already exists. Running next file!")
+      #   next()
+      # }
       
       random_params <-
         paste0(data_folder_name, estimator_name,"-", data_name,"-",sampsize,"-",
-               "random",".rds")
+               "random",".csv")
       
       bayes_params <- 
         paste0(data_folder_name, estimator_name,"-", data_name,"-",sampsize,"-",
@@ -109,9 +109,14 @@ for (sampsize in samplesize_grid) {
                            Yobs = Ytrain)
             
             Er <- E["random_rf"]
-            #saveRDS(random_rf, file = random_params)
+            write.table(data.frame(mtry = Er[[1]]@mtry,
+                                   nodesizeStrictSpl = Er[[1]]@nodesizeStrictSpl,
+                                   overfitPenalty = Er[[1]]@overfitPenalty), 
+                        file = random_params,
+                        row.names = FALSE,
+                        sep = ",")
             
-            Eb <- E["bayes_rf"]
+            #Eb <- E["bayes_rf"]
             #saveRDS(bayes_rf, file = bayes_params)
             
           } else {
@@ -128,13 +133,13 @@ for (sampsize in samplesize_grid) {
           
           if (substr(estimator_name, 1, 5) == "caret") {
             predr <- predictor(Er, Xtest)
-            predb <- predictor(Eb, Xtest)
+            #predb <- predictor(Eb, Xtest)
             
             prediction_time <- as.numeric(difftime(Sys.time(),
                                                    prediction_time_start,
                                                    tz,
                                                    units = "mins"))
-            list("random" = predr, "bayes" = predb)
+            list("random" = predr)#, "bayes" = predb)
           } else {
             pdts <- predictor(E, Xtest)
             prediction_time <- as.numeric(difftime(Sys.time(),
@@ -142,7 +147,7 @@ for (sampsize in samplesize_grid) {
                                                    tz,
                                                    units = "mins"))
             pdts
-            }
+          }
         },
         error = function(err) {
           print(err)
@@ -151,14 +156,14 @@ for (sampsize in samplesize_grid) {
         })
       
       if (substr(estimator_name, 1, 5) == "caret") {
-        for (tune in c("random", "bayes")) {
+        for (tune in c("random")) {#, "bayes")) {
           estimate_ir <- data.frame(paste(tune, estimator_name, sep = ""), 
-                                   data_name,
-                                   sampsize,
-                                   y_estimate = estimate_i[tune],
-                                   y_true = Ytest,
-                                   training_time,
-                                   prediction_time)
+                                    data_name,
+                                    sampsize,
+                                    y_estimate = estimate_i[tune],
+                                    y_true = Ytest,
+                                    training_time,
+                                    prediction_time)
           filename <- paste0(data_folder_name,tune,estimator_name,"-", data_name,"-",sampsize, ".csv")
           
           col.names <- !file.exists(filename)
@@ -171,7 +176,7 @@ for (sampsize in samplesize_grid) {
             sep = ","
           )
         }
-          
+        
       } else {
         estimate_i <- data.frame(estimator_name, 
                                  data_name,
@@ -195,4 +200,5 @@ for (sampsize in samplesize_grid) {
     }
   }
 }
+
 
