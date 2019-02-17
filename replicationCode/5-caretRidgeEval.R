@@ -11,7 +11,7 @@ if (dir.exists("~/Dropbox/ridgeEvaluation/")) {
 }
 
 # install most up to date version of forestry
-devtools::install_github("soerenkuenzel/forestry", ref = "SpecifyLinearFeatures")
+devtools::install_github("soerenkuenzel/forestry")
 
 library(forestry)
 library(ranger)
@@ -26,7 +26,7 @@ library(rBayesianOptimization)
 data_folder_name <- "replicationCode/estimates/"
 dir.create(data_folder_name, showWarnings = FALSE)
 
-source("replicationCode/generateLimitedData.R")
+source("replicationCode/1.5-generateLimitedData.R")
 source("replicationCode/2-generateEstimators.R")
 
 set.seed(634801)
@@ -38,7 +38,7 @@ set.seed(634801)
 # Output results as .csv
 
 # Set fraction of data set aside for training + several sample sizes used
-samplesize_grid <- 4 * 2^(10)
+samplesize_grid <- 4 * 2^(5)
 
 # Loop through all datset, estimator combination
 for (sampsize in samplesize_grid) {
@@ -80,9 +80,6 @@ for (sampsize in samplesize_grid) {
         filenamer <-
           paste0(data_folder_name,"random", estimator_name,"-", data_name,"-",sampsize, 
                  ".csv")
-        filenameb <-
-          paste0(data_folder_name,"bayes", estimator_name,"-", data_name,"-",sampsize, 
-                 ".csv")
       }
       
       # if (file.exists(filename) || file.exists(filenamer) || file.exists(filenameb) ) {
@@ -93,10 +90,6 @@ for (sampsize in samplesize_grid) {
       random_params <-
         paste0(data_folder_name, estimator_name,"-", data_name,"-",sampsize,"-",
                "random",".csv")
-      
-      bayes_params <- 
-        paste0(data_folder_name, estimator_name,"-", data_name,"-",sampsize,"-",
-               "bayes",".rds")
       
       training_time <- prediction_time <- NA
       estimate_i <-
@@ -115,9 +108,12 @@ for (sampsize in samplesize_grid) {
                         file = random_params,
                         row.names = FALSE,
                         sep = ",")
+
+          } else if (substr(estimator_name, 1, 6) == "ranger") {
+            E <- estimator(Xobs = as.data.frame(Xtrain),
+                           Yobs = Ytrain)
             
-            #Eb <- E["bayes_rf"]
-            #saveRDS(bayes_rf, file = bayes_params)
+            Er <- E["tuned_ranger"]
             
           } else {
             E <- estimator(Xobs = as.data.frame(Xtrain),
@@ -133,13 +129,13 @@ for (sampsize in samplesize_grid) {
           
           if (substr(estimator_name, 1, 5) == "caret") {
             predr <- predictor(Er, Xtest)
-            #predb <- predictor(Eb, Xtest)
+            
             
             prediction_time <- as.numeric(difftime(Sys.time(),
                                                    prediction_time_start,
                                                    tz,
                                                    units = "mins"))
-            list("random" = predr)#, "bayes" = predb)
+            list("random" = predr)
           } else {
             pdts <- predictor(E, Xtest)
             prediction_time <- as.numeric(difftime(Sys.time(),
@@ -156,7 +152,7 @@ for (sampsize in samplesize_grid) {
         })
       
       if (substr(estimator_name, 1, 5) == "caret") {
-        for (tune in c("random")) {#, "bayes")) {
+        for (tune in c("random")) {
           estimate_ir <- data.frame(paste(tune, estimator_name, sep = ""), 
                                     data_name,
                                     sampsize,
@@ -200,5 +196,3 @@ for (sampsize in samplesize_grid) {
     }
   }
 }
-
-
