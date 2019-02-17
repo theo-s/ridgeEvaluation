@@ -28,22 +28,40 @@ for (file in file_grid) {
                      read.csv(paste0(dta_folder, file)))
   
 }
-full_data <- full_data %>% tbl_df()
-
+full_data <- full_data %>% tbl_df() %>%
+  mutate(estimator_name = as.character(estimator_name),
+         estimator_name = ifelse(estimator_name == "cubist", "tuned_cubist", estimator_name), 
+         estimator_name = ifelse(estimator_name == "forestry", "untuned_forestry", estimator_name), 
+         estimator_name = ifelse(estimator_name == "glmnet", "tuned_glmnet", estimator_name), 
+         estimator_name = ifelse(estimator_name == "glmnet_1", "tuned_glmnet_1", estimator_name), 
+         estimator_name = ifelse(estimator_name == "glmnet_2", "tuned_glmnet_2", estimator_name), 
+         estimator_name = ifelse(estimator_name == "glmnet_3", "tuned_glmnet_3", estimator_name), 
+         estimator_name = ifelse(estimator_name == "randomcaretRidgeRF", "tuned_RidgeRF", estimator_name), 
+         estimator_name = ifelse(estimator_name == "ranger", "tuned_ranger", estimator_name), 
+         estimator_name = ifelse(estimator_name == "ranger_1", "tuned_ranger_1", estimator_name), 
+         estimator_name = ifelse(estimator_name == "ranger_2", "tuned_ranger_2", estimator_name), 
+         estimator_name = ifelse(estimator_name == "ranger_3", "tuned_ranger_3", estimator_name), 
+         estimator_name = ifelse(estimator_name == "ridge_1", "tuned_ridge_1", estimator_name), 
+         estimator_name = ifelse(estimator_name == "ridge_2", "tuned_ridge_2", estimator_name), 
+         estimator_name = ifelse(estimator_name == "ridge_3", "tuned_ridge_3", estimator_name), 
+         estimator_name = ifelse(estimator_name == "ridge_4", "tuned_ridge_4", estimator_name), 
+         estimator_name = ifelse(estimator_name == "ridge_5", "tuned_ridge_5", estimator_name), 
+         estimator_name = ifelse(estimator_name == "local_RF", "tuned_local_RF", estimator_name)) 
 
 for (ds_name in as.character(unique(full_data$data_name))) {
   # ds_name = as.character(unique(full_data$data_name))[1]
   print(ds_name)
-  p_l <- full_data %>% 
+  full_data %>% 
     filter(data_name == ds_name) %>%
     group_by(estimator_name, sampsize) %>%
     summarize(MSE = mean((y_estimate - y_true) ^ 2)) %>%
     ggplot(aes(x = sampsize, y = MSE, color = estimator_name)) +
     geom_line() +
-    scale_y_log10() +
+    # scale_y_log10() +
     theme_bw() +
-    geom_text(aes(label = estimator_name))
+    geom_text(aes(label = estimator_name)) + 
+    ggtitle(ds_name)
   
-  ggsave(p_l, file = paste0("figures/", ds_name, ".pdf"), width = 10, height = 8)
+  ggsave(file = paste0("figures/", ds_name, ".pdf"), width = 10, height = 8)
   
 }
