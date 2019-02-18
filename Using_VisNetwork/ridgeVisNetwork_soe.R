@@ -86,7 +86,10 @@ visualizeRidge <- function(forestry_tree) {
                       level = node_info$level)
   
   edges <- data.frame(from = node_info$parent, 
-                      to = node_info$node_id)
+                      to = node_info$node_id,
+                      smooth = list(enabled = TRUE, 
+                                    type = "cubicBezier", 
+                                    roundness = .5))
   edges <- edges[-1,]
   
   edges$label = ifelse(floor(node_info$split_val[edges$from]) == node_info$split_val[edges$from],
@@ -99,9 +102,9 @@ visualizeRidge <- function(forestry_tree) {
   
   edges$width = node_info$num_averaging[edges$to] / (node_info$num_averaging[1]/ 4)
                       
+  sc <- node_info$num_averaging[edges$to] / (node_info$num_averaging[1]/ 4)
   
-  
-  visNetwork(nodes, edges, width = "100%", length = "150%") %>% 
+  visNetwork(nodes, edges, width = "100%", height = "600px") %>% 
     visEdges(arrows = "to") %>% 
     visHierarchicalLayout()
 }
