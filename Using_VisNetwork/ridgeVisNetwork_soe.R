@@ -6,14 +6,14 @@ library(shiny)
 
 # Simple Iris example with ridgeRF + rpart
 y <- iris[,1]
-x <- iris[,c(-1, -5)]
+x <- iris[,c(-1)]
 
 rpart_tree <- rpart(y~., 
                     data = x)
-
+set.seed(89)
 forestry_tree <- forestry(x = x,
                           y = y,
-                          nodesizeStrictSpl = 10,
+                          nodesizeStrictSpl = 15,
                           ntree = 1, 
                           ridgeRF = TRUE)
 
@@ -91,6 +91,39 @@ for (i in 1:nrow(node_info)) {
 
   
 node_info
+
+nodes <- data.frame(id = node_info$node_id, 
+                    shape = ifelse(is.na(node_info$split_feat), 
+                            "square", "circle"),
+                    label = ifelse(is.na(node_info$split_val), 
+                                   paste0(node_info$num_averaging, " Obs"), 
+                                   paste0(feat_names[node_info$split_feat])),
+                    level = node_info$level)
+
+edges <- data.frame(from = node_info$parent, 
+                    to = node_info$node_id)
+edges <- edges[-1,]
+
+edges$label = ifelse(floor(node_info$split_val[edges$from]) == node_info$split_val[edges$from],
+                                   ifelse(node_info$left_child[edges$from] == edges$to,
+                                          paste0(" = ", round(node_info$split_val[edges$from], digits = 2)),
+                                          paste0(" != ", round(node_info$split_val[edges$from], digits = 2))),
+                                   ifelse(node_info$left_child[edges$from] == edges$to,
+                                          paste0(" < ", round(node_info$split_val[edges$from], digits = 2)),
+                                          paste0(" >= ", round(node_info$split_val[edges$from], digits = 2))))
+
+edges$width = node_info$num_averaging[edges$to] / (node_info$num_averaging[1]/ 4)
+                    
+
+
+visNetwork(nodes, edges, width = "100%", length = "150%") %>% 
+  visEdges(arrows = "to") %>% 
+  visHierarchicalLayout()
+
+
+# ifelse(floor(node_info$split_val) == node_info$split_val,
+#        paste0("x", node_info$split_feat, "!= ", node_info$split_val),
+#        paste0("x", node_info$split_feat, ">= ", round(node_info$split_val, digits = 2)))
 
 # ------------------------------------------------------------------------------
 nodes <- data.frame(id = 1:4, level = c(2, 1, 1, 1))
