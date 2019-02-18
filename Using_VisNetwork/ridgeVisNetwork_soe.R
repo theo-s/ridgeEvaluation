@@ -5,8 +5,8 @@ library(shiny)
 
 
 # Simple Iris example with ridgeRF + rpart
-y <- iris[1:75,1]
-x <- iris[1:75,c(-1, -5)]
+y <- iris[,1]
+x <- iris[,c(-1, -5)]
 
 rpart_tree <- rpart(y~., 
                     data = x)
@@ -15,11 +15,10 @@ forestry_tree <- forestry(x = x,
                           y = y,
                           nodesizeStrictSpl = 10,
                           ntree = 1, 
-                          splitratio = .9,
                           ridgeRF = TRUE)
 
 
-visTree(rpart_tree, main = "Iris classification Tree", width = "100%")
+# visTree(rpart_tree, main = "Iris classification Tree", width = "100%")
 
 # Get split points data for Ridge tree and translate ---------------------------
 forestry_tree <- make_savable(forestry_tree)
@@ -82,6 +81,15 @@ for (i in nrow(node_info):1) {
   }
 }
 
+node_info$level <- 1
+for (i in 1:nrow(node_info)) {
+  if (!node_info$is_leaf[i]) {
+    node_info$level[node_info$left_child[i]] <- node_info$level[i] + 1
+    node_info$level[node_info$right_child[i]] <- node_info$level[i] + 1
+  }
+}
+
+  
 node_info
 
 # ------------------------------------------------------------------------------
