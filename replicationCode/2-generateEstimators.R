@@ -9,7 +9,7 @@ library(caret)
 # Define all estimators:
 
 estimator_grid <- list(
-  "caretRidgeRF" = function(Xobs, Yobs) {
+  "caretRidgeRF" = function(Xobs, Yobs, tune_length, cv_fold) {
 
     create_random_node_sizes <- function(nobs, len) {
       # Function creates random node sizes
@@ -66,17 +66,17 @@ estimator_grid <- list(
 
     fitControl <- trainControl(method = "repeatedcv",
                                ## 10-fold CV
-                               number = 5,
+                               number = 8,
                                ## repeated 5 times
-                               repeats = 5,
-                               adaptive = list(min = 3, alpha = 0.05,
+                               repeats = 10,
+                               adaptive = list(min = 5, alpha = 0.05,
                                                method = "gls", complete = TRUE))
 
     random_rf <- train(Yobs ~.,
                        data = cbind(Xobs, Yobs),
                        method = ridgeRF,
                        metric = "RMSE",
-                       tuneLength = 50,
+                       tuneLength = tune_length,
                        trControl = fitControl)
 
     return(list("random_rf" = random_rf$finalModel))
