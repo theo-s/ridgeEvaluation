@@ -9,7 +9,7 @@ library(caret)
 # Define all estimators:
 
 estimator_grid <- list(
-  "caretRidgeRF" = function(Xobs, Yobs, tune_length, cv_fold) {
+  "caretRidgeRF" = function(Xobs, Yobs, tune_length = 50, cv_fold = 8) {
 
     create_random_node_sizes <- function(nobs, len) {
       # Function creates random node sizes
@@ -66,7 +66,7 @@ estimator_grid <- list(
 
     fitControl <- trainControl(method = "repeatedcv",
                                ## 10-fold CV
-                               number = 8,
+                               number = cv_fold,
                                ## repeated 5 times
                                repeats = 10,
                                adaptive = list(min = 5, alpha = 0.05,
@@ -85,11 +85,11 @@ estimator_grid <- list(
   "forestry" = function(Xobs, Yobs)
     forestry(Xobs, Yobs),
   
-  "ranger" = function(Xobs, Yobs) {
-    length <- 50
+  "ranger" = function(Xobs, Yobs, tune_length = 50) {
+    
     fitControl <- trainControl(method = "repeatedcv",
                                ## 5-fold CV
-                               number = 5,
+                               number = 8,
                                ## repeated 5 times
                                repeats = 10,
                                adaptive = list(min = 5, alpha = 0.05,
@@ -118,13 +118,13 @@ estimator_grid <- list(
       return(paramGrid)
     }
     
-    ranger_grid <- grid(Xobs, Yobs, length)
+    ranger_grid <- grid(Xobs, Yobs, tune_length)
     
     tuned_ranger <- train(Yobs ~.,
                           data = cbind(Xobs, Yobs),
                           method = 'ranger',
                           metric = "RMSE",
-                          tuneLength = length,
+                          tuneLength = tune_length,
                           trControl = fitControl,
                           tuneGrid = ranger_grid)
     
