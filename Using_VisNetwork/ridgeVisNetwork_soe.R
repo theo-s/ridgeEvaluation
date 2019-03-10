@@ -8,7 +8,7 @@ library(shiny)
 visualizeRidge <- function(forestry_tree) {
   forestry_tree <- make_savable(forestry_tree)
   
-  feat_names <- colnames(x)
+  feat_names <- colnames(forestry_tree@processed_dta$processed_x)
   split_feat <- forestry_tree@R_forest[[1]]$var_id
   split_val <- forestry_tree@R_forest[[1]]$split_val
   

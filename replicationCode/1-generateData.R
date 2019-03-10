@@ -170,4 +170,3 @@ datasets_grid[["artificial-semilinear_2"]] <- list(
 
 
 str(datasets_grid)
-

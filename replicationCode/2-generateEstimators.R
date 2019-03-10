@@ -10,22 +10,22 @@ library(caret)
 
 estimator_grid <- list(
   "caretRidgeRF" = function(Xobs, Yobs, tune_length = 50, cv_fold = 8) {
-
+    
     create_random_node_sizes <- function(nobs, len) {
       # Function creates random node sizes
       potential_sample_space <- c(1:20, round(exp((1:20) / 4) / exp(5) * nobs / 4))
       potential_sample_space <- unique(potential_sample_space)
-
+      
       potential_sample_space <- potential_sample_space[
         potential_sample_space != 0 & potential_sample_space < nobs]
-
+      
       if (length(potential_sample_space) < 1) {
         stop(paste0("It seems like there are not enough samples to generate ",
                     "nodesizes. It looks like the samples size is ", nobs, "."))
       }
       return(sample(potential_sample_space, size = len, replace = TRUE))
     }
-
+    
     ridgeRF <- list(type = "Regression",
                     library = "forestry",
                     loop = NULL,
@@ -36,13 +36,13 @@ estimator_grid <- list(
                     grid = function(x, y, len = NULL, search = "random") {
                       ## Define ranges for the parameters and
                       ## generate random values for them
-
+                      
                       paramGrid <- data.frame(mtry = sample(1:ncol(x), size = len, replace = TRUE),
                                               nodesizeStrictSpl = create_random_node_sizes(nobs = nrow(x),
                                                                                            len = len),
                                               # Might want to pass specific range/distribution for lambdas
                                               overfitPenalty = exp(runif(len,
-                                                                         min = log(.05),
+                                                                         min = log(.1),
                                                                          max = log(10)))
                       )
                       return(paramGrid)
@@ -63,33 +63,32 @@ estimator_grid <- list(
                       predict(modelFit, newdata)
                     },
                     prob= NULL)
-
+    
     fitControl <- trainControl(method = "repeatedcv",
-                               ## 10-fold CV
+                               ## 8-fold CV
                                number = cv_fold,
                                ## repeated 5 times
                                repeats = 10,
                                adaptive = list(min = 5, alpha = 0.05,
                                                method = "gls", complete = TRUE))
-
+    
     random_rf <- train(Yobs ~.,
                        data = cbind(Xobs, Yobs),
                        method = ridgeRF,
                        metric = "RMSE",
                        tuneLength = tune_length,
                        trControl = fitControl)
-
+    
     return(list("random_rf" = random_rf$finalModel))
   },
   
   "forestry" = function(Xobs, Yobs)
     forestry(Xobs, Yobs),
   
-  "ranger" = function(Xobs, Yobs, tune_length = 50) {
-    
+  "ranger" = function(Xobs, Yobs, tune_length = 50, cv_fold = 8) {
     fitControl <- trainControl(method = "repeatedcv",
                                ## 5-fold CV
-                               number = 8,
+                               number = cv_fold,
                                ## repeated 5 times
                                repeats = 10,
                                adaptive = list(min = 5, alpha = 0.05,
@@ -124,7 +123,7 @@ estimator_grid <- list(
                           data = cbind(Xobs, Yobs),
                           method = 'ranger',
                           metric = "RMSE",
-                          tuneLength = tune_length,
+                          tuneLength = length,
                           trControl = fitControl,
                           tuneGrid = ranger_grid)
     
