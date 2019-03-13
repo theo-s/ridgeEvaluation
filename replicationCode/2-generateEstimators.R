@@ -25,14 +25,14 @@ estimator_grid <- list(
       }
       return(sample(potential_sample_space, size = len, replace = TRUE))
     }
-    
+
     ridgeRF <- list(type = "Regression",
                     library = "forestry",
                     loop = NULL,
                     parameters = data.frame(
-                      parameter = c("mtry", "nodesizeStrictSpl", "overfitPenalty"),
-                      class = rep("numeric", 3),
-                      label = c("mtry", "nodesizeStrictSpl", "overfitPenalty")),
+                      parameter = c("mtry", "nodesizeStrictSpl", "overfitPenalty","ridgeRF", "splitratio"),
+                      class = c(rep("numeric", 3), "logical", "logical"),
+                      label = c("mtry", "nodesizeStrictSpl", "overfitPenalty", "ridgeRF", "splitratio")),
                     grid = function(x, y, len = NULL, search = "random") {
                       ## Define ranges for the parameters and
                       ## generate random values for them
@@ -43,27 +43,37 @@ estimator_grid <- list(
                                               # Might want to pass specific range/distribution for lambdas
                                               overfitPenalty = exp(runif(len,
                                                                          min = log(.1),
-                                                                         max = log(10)))
-                      )
+                                                                         max = log(10))),
+                                              ridgeRF=c(TRUE,FALSE),
+                                              splitratio=c(FALSE,TRUE)
+                                              )
+
+                        print(paramGrid)
                       return(paramGrid)
                     },
                     fit = function(x, y, wts, param, lev = NULL, last, weights, classProbs) {
+                        if(param$splitratio==FALSE)
+                            param$splitratio <- 0.5
+                        param$splitratio <- as.numeric(param$splitratio)
+
                       forestry(x = x,
                                y = y,
-                               ridgeRF = TRUE,
+                               ridgeRF = param$ridgeRF,
                                nodesizeSpl = 1,
                                nodesizeAvg = 1,
                                nodesizeStrictAvg = 1,
                                nodesizeStrictSpl = param$nodesizeStrictSpl,
                                mtry = param$mtry,
                                overfitPenalty = param$overfitPenalty,
+                               doubleTree=TRUE,
+                               splitratio=param$splitratio,
                                saveable = FALSE)
                     },
                     predict = function(modelFit, newdata, preProc = NULL, submodels = NULL) {
                       predict(modelFit, newdata)
                     },
                     prob= NULL)
-    
+
     fitControl <- trainControl(method = "repeatedcv",
                                ## 8-fold CV
                                number = cv_fold,
@@ -71,7 +81,7 @@ estimator_grid <- list(
                                repeats = 10,
                                adaptive = list(min = 5, alpha = 0.05,
                                                method = "gls", complete = TRUE))
-    
+
     random_rf <- train(Yobs ~.,
                        data = cbind(Xobs, Yobs),
                        method = ridgeRF,
