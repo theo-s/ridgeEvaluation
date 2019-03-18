@@ -30,9 +30,9 @@ estimator_grid <- list(
                     library = "forestry",
                     loop = NULL,
                     parameters = data.frame(
-                      parameter = c("mtry", "nodesizeStrictSpl", "overfitPenalty","ridgeRF", "splitratio"),
-                      class = c(rep("numeric", 3), "logical", "logical"),
-                      label = c("mtry", "nodesizeStrictSpl", "overfitPenalty", "ridgeRF", "splitratio")),
+                      parameter = c("mtry", "nodesizeStrictSpl", "overfitPenalty", "ridgeRF", "splitratio","minSplitGain"),
+                      class = c(rep("numeric", 3), "logical", "logical", "numeric"),
+                      label = c("mtry", "nodesizeStrictSpl", "overfitPenalty", "ridgeRF", "splitratio", "minSplitGain")),
                     grid = function(x, y, len = NULL, search = "random") {
                       ## Define ranges for the parameters and
                       ## generate random values for them
@@ -45,7 +45,8 @@ estimator_grid <- list(
                                                                          min = log(.1),
                                                                          max = log(10))),
                                               ridgeRF=c(TRUE,FALSE),
-                                              splitratio=c(FALSE,TRUE)
+                                              splitratio=c(FALSE,TRUE),
+                                              minSplitGain=runif(len,min=0, max=.8)
                                               )
 
                         print(paramGrid)
@@ -56,6 +57,13 @@ estimator_grid <- list(
                             param$splitratio <- 0.5
                         param$splitratio <- as.numeric(param$splitratio)
 
+                        if(param$ridgeRF==FALSE)
+                            param$minSplitGain=0
+
+                        param$doubleTree <- TRUE
+                        if(param$splitratio==1)
+                            param$doubleTree=FALSE
+
                       forestry(x = x,
                                y = y,
                                ridgeRF = param$ridgeRF,
@@ -65,8 +73,9 @@ estimator_grid <- list(
                                nodesizeStrictSpl = param$nodesizeStrictSpl,
                                mtry = param$mtry,
                                overfitPenalty = param$overfitPenalty,
-                               doubleTree=TRUE,
+                               doubleTree=param$doubleTree,
                                splitratio=param$splitratio,
+                               minSplitGain=param$minSplitGain,
                                saveable = FALSE)
                     },
                     predict = function(modelFit, newdata, preProc = NULL, submodels = NULL) {
