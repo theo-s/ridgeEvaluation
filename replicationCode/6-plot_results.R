@@ -65,3 +65,23 @@ for (ds_name in as.character(unique(full_data$data_name))) {
   ggsave(file = paste0("figures/", ds_name, ".pdf"), width = 10, height = 8)
   
 }
+
+
+for (ds_name in as.character(unique(full_data$data_name))) {
+  # ds_name = as.character(unique(full_data$data_name))[1]
+  print(ds_name)
+  full_data %>% 
+    filter(data_name == ds_name) %>%
+    group_by(estimator_name, sampsize) %>%
+    summarize(MSE = mean((y_estimate - y_true) ^ 2)) %>%
+    saveRDS(file = paste0(ds_name,".rds"))
+  #ggplot(aes(x = sampsize, y = MSE, color = estimator_name)) +
+  #geom_line() +
+  ## scale_y_log10() +
+  #theme_bw() +
+  #geom_text(aes(label = estimator_name)) + 
+  #ggtitle(ds_name)
+  
+  #ggsave(file = paste0("figures/", ds_name, ".pdf"), width = 10, height = 8)
+  
+}
