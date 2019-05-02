@@ -25,10 +25,11 @@ library(caret)
 data_folder_name <- "replicationCode/estimates/"
 dir.create(data_folder_name, showWarnings = FALSE)
 
-source("replicationCode/1.5-generateDataBigtest.R")
+#set.seed(634801) Previous seed with bad LM Medium Trend
+set.seed(601) 
+#source("replicationCode/1.5-generateDataBigtest.R")
 source("replicationCode/2-generateEstimators.R")
-
-set.seed(634801)
+source("replicationCode/1.7-generateDataFinal.R")
 
 # Loop through data sets -------------------------------------------------------
 
@@ -37,8 +38,8 @@ set.seed(634801)
 # Output results as .csv
 
 # Set fraction of data set aside for training + several sample sizes used
-samplesize_grid <- 4 * 2^(4:10)
-num_avg <- 25
+samplesize_grid <- 4 * 2^(4:9)
+num_avg <- 20
 
 # Loop through all datset, estimator combination
 for (sampsize in samplesize_grid) {
@@ -82,7 +83,7 @@ for (sampsize in samplesize_grid) {
       }
       
       params <-
-        paste0(data_folder_name, estimator_name,"-", data_name,"-",sampsize,"-",
+        paste0(data_folder_name,"parameters/", estimator_name,"-", data_name,"-",sampsize,"-",
                "random",".csv")
       if (substr(estimator_name, 1, 5) == "caret") {
         cur_params <- read.csv(params)

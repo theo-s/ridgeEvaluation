@@ -9,7 +9,7 @@ library(caret)
 # Define all estimators:
 
 estimator_grid <- list(
-  "caretRidgeRF" = function(Xobs, Yobs, tune_length = 50, cv_fold = 8) {
+  "caretRidgeRF" = function(Xobs, Yobs, tune_length = 15, cv_fold = 8) {
     
     create_random_node_sizes <- function(nobs, len) {
       # Function creates random node sizes
@@ -25,14 +25,14 @@ estimator_grid <- list(
       }
       return(sample(potential_sample_space, size = len, replace = TRUE))
     }
-
+    
     ridgeRF <- list(type = "Regression",
                     library = "forestry",
                     loop = NULL,
                     parameters = data.frame(
-                      parameter = c("mtry", "nodesizeStrictSpl", "overfitPenalty", "ridgeRF", "splitratio","minSplitGain"),
-                      class = c(rep("numeric", 3), "logical", "logical", "numeric"),
-                      label = c("mtry", "nodesizeStrictSpl", "overfitPenalty", "ridgeRF", "splitratio", "minSplitGain")),
+                      parameter = c("mtry", "nodesizeStrictSpl", "overfitPenalty"),
+                      class = rep("numeric", 3),
+                      label = c("mtry", "nodesizeStrictSpl", "overfitPenalty")),
                     grid = function(x, y, len = NULL, search = "random") {
                       ## Define ranges for the parameters and
                       ## generate random values for them
@@ -43,46 +43,28 @@ estimator_grid <- list(
                                               # Might want to pass specific range/distribution for lambdas
                                               overfitPenalty = exp(runif(len,
                                                                          min = log(.1),
-                                                                         max = log(10))),
-                                              ridgeRF=c(TRUE,FALSE),
-                                              splitratio=c(FALSE,TRUE),
-                                              minSplitGain=runif(len,min=0, max=.8)
-                                              )
-
-                        print(paramGrid)
+                                                                         max = log(10)))
+                      )
                       return(paramGrid)
                     },
                     fit = function(x, y, wts, param, lev = NULL, last, weights, classProbs) {
-                        if(param$splitratio==FALSE)
-                            param$splitratio <- 0.5
-                        param$splitratio <- as.numeric(param$splitratio)
-
-                        if(param$ridgeRF==FALSE)
-                            param$minSplitGain=0
-
-                        param$doubleTree <- TRUE
-                        if(param$splitratio==1)
-                            param$doubleTree=FALSE
-
                       forestry(x = x,
                                y = y,
-                               ridgeRF = param$ridgeRF,
+                               ridgeRF = TRUE,
                                nodesizeSpl = 1,
                                nodesizeAvg = 1,
                                nodesizeStrictAvg = 1,
+                               nthread = 20,
                                nodesizeStrictSpl = param$nodesizeStrictSpl,
                                mtry = param$mtry,
                                overfitPenalty = param$overfitPenalty,
-                               doubleTree=param$doubleTree,
-                               splitratio=param$splitratio,
-                               minSplitGain=param$minSplitGain,
                                saveable = FALSE)
                     },
                     predict = function(modelFit, newdata, preProc = NULL, submodels = NULL) {
                       predict(modelFit, newdata)
                     },
                     prob= NULL)
-
+    
     fitControl <- trainControl(method = "repeatedcv",
                                ## 8-fold CV
                                number = cv_fold,
@@ -90,7 +72,7 @@ estimator_grid <- list(
                                repeats = 10,
                                adaptive = list(min = 5, alpha = 0.05,
                                                method = "gls", complete = TRUE))
-
+    
     random_rf <- train(Yobs ~.,
                        data = cbind(Xobs, Yobs),
                        method = ridgeRF,
@@ -104,13 +86,13 @@ estimator_grid <- list(
   "forestry" = function(Xobs, Yobs)
     forestry(Xobs, Yobs),
   
-  "ranger" = function(Xobs, Yobs, tune_length = 50, cv_fold = 8) {
+  "ranger" = function(Xobs, Yobs, tune_length = 25, cv_fold = 8) {
     fitControl <- trainControl(method = "repeatedcv",
                                ## 5-fold CV
                                number = cv_fold,
                                ## repeated 5 times
-                               repeats = 10,
-                               adaptive = list(min = 5, alpha = 0.05,
+                               repeats = 5,
+                               adaptive = list(min = 3, alpha = 0.05,
                                                method = "gls", complete = TRUE))
     
     create_random_node_sizes <- function(nobs, len) {
@@ -153,8 +135,6 @@ estimator_grid <- list(
   
   "glmnet" = function(Xobs, Yobs)
     glmnet(x = data.matrix(Xobs), y = Yobs),
-  
-  
   "local_RF" = function(Xobs, Yobs)
     local_linear_forest(X = Xobs, Y = Yobs, num.trees = 500),
   

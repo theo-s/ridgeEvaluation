@@ -61,7 +61,7 @@ datasets_grid <- list()
 
 #   Model 5: Large LM-RF Hybrid with big leaves and high penalty 
 bike <- read.csv("replicationCode/bike.csv", header = TRUE)
-bike <- bike[1:8200,-17]
+bike <- bike[1:500,-17]
 
 bike_x <- bike[,c(-1, -2, -16)]
 bike_y <- bike[,16]
