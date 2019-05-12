@@ -61,6 +61,10 @@ test_id <- sort(sample(n, size = round(.95*n))); length(test_id)
 train_id <- (1:n)[!(1:n) %in% test_id]; length(train_id)
 
 cars <- as.data.frame(cars)
+cars <- cbind(cars[,-1], cars[,1])
+colnames(cars)[ncol(cars)] <- "y"
+head(cars)
+
 datasets_grid[["autos"]] <- list(
   "train" = cars[train_id, ],
   "test" = cars[test_id, ])
@@ -92,9 +96,11 @@ test_id <- sort(sample(n, size = round(.85*n))); length(test_id)
 train_id <- (1:n)[!(1:n) %in% test_id]; length(train_id)
 
 bike <- as.data.frame(bike)
+colnames(bike)[ncol(bike)] <- "y"
+head(bike)
 datasets_grid[["bike"]] <- list(
   "bike" = bike[train_id, ],
   "bike" = bike[test_id, ])
 
-str(datasets_grid)
-print(names(datasets_grid))
+# str(datasets_grid)
+# print(names(datasets_grid))

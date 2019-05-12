@@ -43,7 +43,8 @@ estimator_grid <- list(
                                               # Might want to pass specific range/distribution for lambdas
                                               overfitPenalty = exp(runif(len,
                                                                          min = log(.1),
-                                                                         max = log(10)))
+                                                                         max = log(10))), 
+                                              nthread = 1
                       )
                       return(paramGrid)
                     },
@@ -63,14 +64,14 @@ estimator_grid <- list(
                     predict = function(modelFit, newdata, preProc = NULL, submodels = NULL) {
                       predict(modelFit, newdata)
                     },
-                    prob= NULL)
+                    prob = NULL)
     
     fitControl <- trainControl(method = "repeatedcv",
                                ## 8-fold CV
                                number = cv_fold,
                                ## repeated 5 times
                                repeats = 10,
-                               adaptive = list(min = 5, alpha = 0.05,
+                               adaptive = list(min = 2, alpha = 0.05,
                                                method = "gls", complete = TRUE))
     
     random_rf <- train(Yobs ~.,
@@ -84,7 +85,7 @@ estimator_grid <- list(
   },
   
   "forestry" = function(Xobs, Yobs)
-    forestry(Xobs, Yobs),
+    forestry(Xobs, Yobs, nthread = 1),
   
   "ranger" = function(Xobs, Yobs, tune_length = 25, cv_fold = 8) {
     fitControl <- trainControl(method = "repeatedcv",
@@ -114,7 +115,8 @@ estimator_grid <- list(
       paramGrid <- data.frame(mtry = sample(1:ncol(x), size = len, replace = TRUE),
                               splitrule = "variance",
                               min.node.size = create_random_node_sizes(nobs = nrow(x),
-                                                                       len = len))
+                                                                       len = len), 
+                              num.threads = 1)
       return(paramGrid)
     }
     
@@ -136,7 +138,7 @@ estimator_grid <- list(
   "glmnet" = function(Xobs, Yobs)
     glmnet(x = data.matrix(Xobs), y = Yobs),
   "local_RF" = function(Xobs, Yobs)
-    local_linear_forest(X = Xobs, Y = Yobs, num.trees = 500),
+    local_linear_forest(X = Xobs, Y = Yobs, num.trees = 500, num.threads = 1),
   
   
   "cubist" = function(Xobs, Yobs)

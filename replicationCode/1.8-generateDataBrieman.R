@@ -40,8 +40,8 @@ x4 <- runif(n, min = 1, max = 11)
 
 x <- data.frame(x1, x2, x3, x4)
 
-y_2 <- x[,1]^2 + (x[,2]*x[,3] - (1/(x[,2]*x[,3]))^2) ^(.5) + rnorm(n, mean = 0, sd = 600)
-friedman_2 <- cbind(x, y_2)
+y <- x[,1]^2 + (x[,2]*x[,3] - (1/(x[,2]*x[,3]))^2) ^(.5) + rnorm(n, mean = 0, sd = 600)
+friedman_2 <- cbind(x, y)
 
 
 datasets_grid[["Friedman_2"]] <- list(
@@ -51,8 +51,8 @@ datasets_grid[["Friedman_2"]] <- list(
 # Friedman 1
 # Error SD selected to roughly give signal to noise ratio of 3:1
 
-y_3 <- atan( (x[,2]*x[,3] - ( 1/(x[,2]*x[,4]) )) / x[,1]) + rnorm(n, mean = 0, sd = .3)
-friedman_3 <- cbind(x, y_3)
+y <- atan( (x[,2]*x[,3] - (1/(x[,2]*x[,4]) )) / x[,1]) + rnorm(n, mean = 0, sd = .3)
+friedman_3 <- cbind(x, y)
 
 
 datasets_grid[["Friedman_3"]] <- list(
@@ -63,29 +63,43 @@ datasets_grid[["Friedman_3"]] <- list(
 # Real Datasets ----------------------------------------------------------------
 
 # Boston Housing
+
+colnames(Boston)[ncol(Boston)] <- "y"
 n <- nrow(Boston)
 
-test_id <- sort(sample(n, size = round(.1*n)))
-train_id <- (1:n)[!(1:n) %in% test_id]
+flds <- caret::createFolds(Boston$y, k = 5, list = TRUE, returnTrain = FALSE)
 
-
-datasets_grid[["Boston_Housing"]] <- list(
-  "train" = Boston[train_id, ],
-  "test" = Boston[test_id, ])
-
+for (i in 1:length(flds)) {
+  # i = 1
+  test_id <- flds[[i]]
+  train_id <- (1:n)[!(1:n) %in% test_id]
+  
+  
+  datasets_grid[[paste0("Boston_Housing_fold", i)]] <- list(
+    "train" = Boston[train_id, ],
+    "test" = Boston[test_id, ])
+}
 
 # Ozone
 ozone <- cbind(ozone, Ozone = ozone$Ozone)
 ozone <- ozone[,-1]
 n <- nrow(ozone)
 
-test_id <- sort(sample(n, size = round(.1*n)))
-train_id <- (1:n)[!(1:n) %in% test_id]
+colnames(ozone)[ncol(ozone)] <- "y"
+n <- nrow(ozone)
 
+flds <- caret::createFolds(ozone$y, k = 5, list = TRUE, returnTrain = FALSE)
 
-datasets_grid[["Ozone"]] <- list(
-  "train" = ozone[train_id, ],
-  "test" = ozone[test_id, ])
+for (i in 1:length(flds)) {
+  # i = 1
+  test_id <- flds[[i]]
+  train_id <- (1:n)[!(1:n) %in% test_id]
+  
+  
+  datasets_grid[[paste0("Ozone_fold", i)]] <- list(
+    "train" = ozone[train_id, ],
+    "test" = ozone[test_id, ])
+}
 
 # Servo
 n <- nrow(servo)
@@ -93,15 +107,31 @@ test_id <- sort(sample(n, size = round(.1*n)))
 train_id <- (1:n)[!(1:n) %in% test_id]
 
 
-datasets_grid[["Servo"]] <- list(
-  "train" = servo[train_id, ],
-  "test" = servo[test_id, ])
+colnames(servo)[ncol(servo)] <- "y"
+n <- nrow(servo)
+
+flds <- caret::createFolds(servo$y, k = 5, list = TRUE, returnTrain = FALSE)
+
+for (i in 1:length(flds)) {
+  # i = 1
+  test_id <- flds[[i]]
+  train_id <- (1:n)[!(1:n) %in% test_id]
+  
+  
+  datasets_grid[[paste0("Servo_fold", i)]] <- list(
+    "train" = servo[train_id, ],
+    "test" = servo[test_id, ])
+}
+
 
 # Abalone
 n <- nrow(abalone)
 
-test_id <- sort(sample(n, size = round(.25*n)))
-train_id <- (1:n)[!(1:n) %in% test_id]
+colnames(abalone)[ncol(abalone)] <- "y"
+
+
+test_id <- sort(sample(n, size = round(.5*n))); length(test_id)
+train_id <- (1:n)[!(1:n) %in% test_id]; length(train_id)
 
 
 datasets_grid[["Abalone"]] <- list(

@@ -22,6 +22,10 @@ library(reshape)
 library(Cubist)
 library(caret)
 library(clustermq)
+# set up cluster to run on the high partition
+options(clustermq.scheduler = "slurm", 
+        clustermq.template = "~/clustermq_low.tmpl") 
+#~/clustermq_low.tmpl ~/clustermq_high.tmpl
 
 dir.create("replicationCode/9-results/", showWarnings = FALSE)
 
@@ -34,10 +38,9 @@ set.seed(5387479)
 source("replicationCode/2-generateEstimators.R")
 source("replicationCode/1.8-generateDataBrieman.R")
 source("replicationCode/1.9-DS_autos_bike_soe.R")
-
 # generate all the different jobs and save it ----------------------------------
-ds_names <- names(datasets_grid)
-etm_names <- names(estimator_grid)
+(ds_names <- names(datasets_grid))
+(etm_names <- names(estimator_grid))
 
 (all_jobs <- expand.grid(ds_names, etm_names) %>% 
   dplyr::rename(Dataset = Var1, Estimator = Var2)) %>% 
@@ -77,6 +80,8 @@ batch_func <- function(i){
   this_job <- all_jobs[i, ]
   
   # run the current job this will save the results in 9-results/
+  
+  
   this_job$EMSE <- i
   this_job$runtime <- i
   
@@ -90,12 +95,14 @@ batch_func <- function(i){
 }
 
 Q(fun = batch_func,
-  n_jobs = results,
-  i = 1:nrow(all_jobs),
+  n_jobs = 2,
+  i = 1:5, #nrow(all_jobs),
   export = list(
     trainSet = datasets_grid, 
     estimator_grid = estimator_grid, 
-    all_jobs = all_jobs
+    all_jobs = all_jobs, 
+    update_EMSE_table = update_EMSE_table
   ))
 
+read.csv("replicationCode/9-run_all_cluster_results.csv")
 
