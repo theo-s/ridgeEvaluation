@@ -1,3 +1,6 @@
+try(setwd("~/Dropbox/ridgeEvaluation/"), silent = TRUE)
+
+
 library(MASS)
 library(gclus)
 library(forestry)
@@ -105,5 +108,5 @@ datasets_grid[["Abalone"]] <- list(
   "train" = abalone[train_id, ],
   "test" = abalone[test_id, ])
 
-
 str(datasets_grid)
+names(datasets_grid)
