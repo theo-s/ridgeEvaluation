@@ -51,7 +51,7 @@ all_jobs$runtime <- NA
 
 
 # update EMSE table ------------------------------------------------------------
-update_EMSE_table <- function(){
+update_tables <- function(){
   # Reads in all the predicitons in results and computes the EMSE and saves it 
   # in 9-run_all_cluster_results.csv
   
@@ -69,40 +69,55 @@ update_EMSE_table <- function(){
                                 formula = Dataset ~ Estimator,
                                 value.var = "EMSE") 
   write.csv(x = EMSE_table, 
-            file = "replicationCode/9-run_all_cluster_results.csv")
+            file = "replicationCode/9-run_all_cluster_resultsEMSE.csv")
+  Runtime_table <- reshape2::dcast(data = all_jobs,
+                                   formula = Dataset ~ Estimator,
+                                   value.var = "runtime") 
+  write.csv(x = Runtime_table, 
+            file = "replicationCode/9-run_all_cluster_resultsRuntime.csv")
 }
 
 # run the jobs -----------------------------------------------------------------
 batch_func <- function(i){
-  # i <- 1
+  library(dplyr)
+  # i <- 31
   set.seed(6264175)
+  (this_job <- all_jobs[i, ])
   
-  this_job <- all_jobs[i, ]
-  
+  ds <- datasets_grid[[this_job$Dataset]]
+  es <- estimator_grid[[this_job$Estimator]]
+  pd <- predictor_grid[[this_job$Estimator]]
   # run the current job this will save the results in 9-results/
-  
-  
-  this_job$EMSE <- i
-  this_job$runtime <- i
-  
+    
+  tm <- microbenchmark::microbenchmark({
+    es_trnd <- es(Xobs = ds$train %>% dplyr::select(-y), 
+                  Yobs = ds$train %>% dplyr::select(y) %>% .[,1])
+    pdctns <- pd(estimator = es_trnd, 
+                 feat = ds$test %>% dplyr::select(-y))
+    EMSE <- mean((pdctns - ds$test %>% dplyr::select(y) %>% .[,1])^2)
+  }, times = 1, unit = "s")
+  this_job$EMSE <- EMSE
+  this_job$runtime <- summary(tm)$mean
   # save the job
   write.csv(x = this_job, 
             file = paste0("replicationCode/9-results/job", i, ".csv"), 
             row.names = FALSE) 
   
   # Update the EMSE table 
-  update_EMSE_table()
+  update_tables()
 }
 
 Q(fun = batch_func,
   n_jobs = 2,
-  i = 1:5, #nrow(all_jobs),
+  i = 1:nrow(all_jobs),
   export = list(
-    trainSet = datasets_grid, 
+    datasets_grid = datasets_grid, 
     estimator_grid = estimator_grid, 
+    predictor_grid = predictor_grid,
     all_jobs = all_jobs, 
-    update_EMSE_table = update_EMSE_table
+    update_tables = update_tables
   ))
 
-read.csv("replicationCode/9-run_all_cluster_results.csv")
+read.csv("replicationCode/9-run_all_cluster_resultsEMSE.csv")
+read.csv("replicationCode/9-run_all_cluster_resultsRuntime.csv")
 

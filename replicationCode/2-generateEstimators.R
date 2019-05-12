@@ -1,15 +1,11 @@
-library(forestry)
-library(ranger)
-library(glmnet)
-library(grf)
-library(Cubist)
-library(ggplot2)
-library(caret)
 
 # Define all estimators:
 
 estimator_grid <- list(
   "caretRidgeRF" = function(Xobs, Yobs, tune_length = 15, cv_fold = 8) {
+    library(forestry)
+    library(caret)
+    
     
     create_random_node_sizes <- function(nobs, len) {
       # Function creates random node sizes
@@ -84,10 +80,19 @@ estimator_grid <- list(
     return(list("random_rf" = random_rf$finalModel))
   },
   
-  "forestry" = function(Xobs, Yobs)
-    forestry(Xobs, Yobs, nthread = 1),
+  "forestry" = function(Xobs, Yobs) {
+    library(forestry)
+    library(caret)
+    
+    
+    forestry(Xobs, Yobs, nthread = 1)
+  },
   
   "ranger" = function(Xobs, Yobs, tune_length = 25, cv_fold = 8) {
+    library(ranger)
+    library(caret)
+    
+    
     fitControl <- trainControl(method = "repeatedcv",
                                ## 5-fold CV
                                number = cv_fold,
@@ -135,14 +140,33 @@ estimator_grid <- list(
   
   
   
-  "glmnet" = function(Xobs, Yobs)
-    glmnet(x = data.matrix(Xobs), y = Yobs),
-  "local_RF" = function(Xobs, Yobs)
-    local_linear_forest(X = Xobs, Y = Yobs, num.trees = 500, num.threads = 1),
+  "glmnet" = function(Xobs, Yobs) {
+    library(glmnet)
+    library(caret)
+    
+    glmnet(x = data.matrix(Xobs), y = Yobs)
+  },
+  
+  "local_RF" = function(Xobs, Yobs) {
+    library(grf)
+    library(caret)
+    
+    local_linear_forest(
+      X = Xobs,
+      Y = Yobs,
+      num.trees = 500,
+      num.threads = 1
+    )
+  },
   
   
-  "cubist" = function(Xobs, Yobs)
+  
+  "cubist" = function(Xobs, Yobs) {
+    library(Cubist)
+    library(caret)
+    
     cubist(x = Xobs, y = Yobs)
+  }
 )
 
 
