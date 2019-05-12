@@ -80,35 +80,45 @@ update_tables <- function(){
 # run the jobs -----------------------------------------------------------------
 batch_func <- function(i){
   library(dplyr)
-  # i <- 31
+  # i <- 45
   set.seed(6264175)
   (this_job <- all_jobs[i, ])
+
+  filename <- paste0("replicationCode/9-results/job_", 
+                     this_job$Dataset, "_", 
+                     this_job$Estimator,".csv")
   
-  ds <- datasets_grid[[this_job$Dataset]]
-  es <- estimator_grid[[this_job$Estimator]]
-  pd <- predictor_grid[[this_job$Estimator]]
-  # run the current job this will save the results in 9-results/
+  if (!filename %in% dir("replicationCode/9-results")) {
     
-  tm <- microbenchmark::microbenchmark({
-    es_trnd <- es(Xobs = ds$train %>% dplyr::select(-y), 
-                  Yobs = ds$train %>% dplyr::select(y) %>% .[,1])
-    pdctns <- pd(estimator = es_trnd, 
-                 feat = ds$test %>% dplyr::select(-y))
-    EMSE <- mean((pdctns - ds$test %>% dplyr::select(y) %>% .[,1])^2)
-  }, times = 1, unit = "s")
-  this_job$EMSE <- EMSE
-  this_job$runtime <- summary(tm)$mean
-  # save the job
-  write.csv(x = this_job, 
-            file = paste0("replicationCode/9-results/job", i, ".csv"), 
-            row.names = FALSE) 
-  
-  # Update the EMSE table 
-  update_tables()
+    ds <- datasets_grid[[this_job$Dataset]]
+    es <- estimator_grid[[this_job$Estimator]]
+    pd <- predictor_grid[[this_job$Estimator]]
+    # run the current job this will save the results in 9-results/
+      
+    tm <- microbenchmark::microbenchmark({
+      es_trnd <- es(Xobs = ds$train %>% dplyr::select(-y), 
+                    Yobs = ds$train %>% dplyr::select(y) %>% .[,1])
+      pdctns <- pd(estimator = es_trnd, 
+                   feat = ds$test %>% dplyr::select(-y))
+      EMSE <- mean((pdctns - ds$test %>% dplyr::select(y) %>% .[,1])^2)
+    }, times = 1, unit = "s")
+    this_job$EMSE <- EMSE
+    this_job$runtime <- summary(tm)$mean
+    # save the job
+    write.csv(x = this_job, 
+              file = filename, 
+              row.names = FALSE) 
+    
+    # Update the EMSE table 
+    update_tables()
+    
+  }
 }
 
+all_jobs <- all_jobs[all_jobs$Estimator != "ranger", ]
+
 Q(fun = batch_func,
-  n_jobs = 2,
+  n_jobs = 36,
   i = 1:nrow(all_jobs),
   export = list(
     datasets_grid = datasets_grid, 
