@@ -9,7 +9,7 @@ estimator_grid <- list(
     
     create_random_node_sizes <- function(nobs, len) {
       # Function creates random node sizes
-      potential_sample_space <- c(1:20, round(exp((1:20) / 4) / exp(5) * nobs / 4))
+      potential_sample_space <- c(2:20, round(exp((1:20) / 4) / exp(5) * nobs / 4))
       potential_sample_space <- unique(potential_sample_space)
       
       potential_sample_space <- potential_sample_space[
@@ -81,14 +81,14 @@ estimator_grid <- list(
     
     return(list("random_rf" = random_rf$finalModel))
   },
-  "caretRidgeTree" = function(Xobs, Yobs, tune_length = 25, cv_fold = 4) {
+  "caretRidgeTree" = function(Xobs, Yobs, tune_length = 25, cv_fold = 5) {
     library(forestry)
     library(caret)
     
     
     create_random_node_sizes <- function(nobs, len) {
       # Function creates random node sizes
-      potential_sample_space <- c(1:20, round(exp((1:20) / 4) / exp(5) * nobs / 4))
+      potential_sample_space <- c(2:20, round(exp((1:20) / 4) / exp(5) * nobs / 4))
       potential_sample_space <- unique(potential_sample_space)
       
       potential_sample_space <- potential_sample_space[
@@ -121,6 +121,7 @@ estimator_grid <- list(
                                                                          max = log(10))), 
                                               nthread = 1
                       )
+                      print(paramGrid)
                       return(paramGrid)
                     },
                     fit = function(x, y, wts, param, lev = NULL, last, weights, classProbs) {
@@ -147,8 +148,8 @@ estimator_grid <- list(
                                ## 8-fold CV
                                number = cv_fold,
                                ## repeated 5 times
-                               repeats = 2,
-                               adaptive = list(min = 3, alpha = 0.05,
+                               repeats = 5,
+                               adaptive = list(min = 5, alpha = 0.05,
                                                method = "BT", complete = TRUE))
     
     random_rf <- train(Yobs ~.,
@@ -206,7 +207,7 @@ estimator_grid <- list(
     }
     
     ranger_grid <- grid(Xobs, Yobs, tune_length)
-    
+    browser()
     tuned_ranger <- train(Yobs ~.,
                           data = cbind(Xobs, Yobs),
                           method = 'ranger',
@@ -255,11 +256,11 @@ estimator_grid <- list(
 
 predictor_grid <- list(
   "caretRidgeRF" = function(estimator, feat) {
-    return(predict(estimator, feat))
+    return(predict(estimator, feat)$random_rf)
   },
   
   "caretRidgeTree" = function(estimator, feat) {
-    return(predict(estimator, feat))
+    return(predict(estimator, feat)$random_rf)
   },
   
   "forestry" = function(estimator, feat) {
