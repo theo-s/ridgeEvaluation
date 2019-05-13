@@ -104,6 +104,8 @@ for (i in 1:length(flds)) {
 
 # Servo
 n <- nrow(servo)
+servo_onehot_translator <- onehot::onehot(servo)
+servo <- predict(servo_onehot_translator, servo)
 test_id <- sort(sample(n, size = round(.1*n)))
 train_id <- (1:n)[!(1:n) %in% test_id]
 

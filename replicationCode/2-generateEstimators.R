@@ -44,7 +44,7 @@ estimator_grid <- list(
                                                                          min = log(.1),
                                                                          max = log(10))),
                                               minSplitGain = runif(len, 0, .5)^4, 
-                                              ntree = 50
+                                              ntree = 500
                       )
                       return(paramGrid)
                     },

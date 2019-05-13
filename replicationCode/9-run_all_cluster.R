@@ -90,9 +90,9 @@ batch_func <- function(i){
   
   if (!substr(filename, 27, 1000) %in% dir("replicationCode/9-results")) {
     
-    ds <- datasets_grid[[this_job$Dataset]]
-    es <- estimator_grid[[this_job$Estimator]]
-    pd <- predictor_grid[[this_job$Estimator]]
+    ds <- datasets_grid[[as.character(this_job$Dataset)]]
+    es <- estimator_grid[[as.character(this_job$Estimator)]]
+    pd <- predictor_grid[[as.character(this_job$Estimator)]]
     # run the current job this will save the results in 9-results/
       
     tm <- microbenchmark::microbenchmark({
@@ -121,25 +121,26 @@ batch_func <- function(i){
 # 21
 # 51
 # 71
-all_jobs[c(11,32,74),]
-batch_func(i = 34)
+# all_jobs[c(11,32,74),]
+# batch_func(i = 34)
+# 
+# readRDS("replicationCode/tuningParam/RidgeForestOzone_fold5.RDS")
+# 
+# batch_func(11)
+# batch_func(74)
+batch_func(i = 93)
 
-readRDS("replicationCode/tuningParam/RidgeForestOzone_fold5.RDS")
-
-batch_func(11)
-batch_func(74)
-
-
-# Q(fun = batch_func,
-#   n_jobs = nrow(all_jobs),
-#   i = which(all_jobs$Estimator %in% c("forestry")), #1:nrow(all_jobs),
-#   export = list(
-#     datasets_grid = datasets_grid,
-#     estimator_grid = estimator_grid,
-#     predictor_grid = predictor_grid,
-#     all_jobs = all_jobs,
-#     update_tables = update_tables
-#   ))
+Q(fun = batch_func,
+  n_jobs = nrow(all_jobs),
+  i = 1:nrow(all_jobs),
+  export = list(
+    datasets_grid = datasets_grid,
+    estimator_grid = estimator_grid,
+    predictor_grid = predictor_grid,
+    all_jobs = all_jobs,
+    update_tables = update_tables, 
+    create_random_node_sizes = create_random_node_sizes
+  ))
 
 update_tables()
 
