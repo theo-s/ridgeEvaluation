@@ -80,7 +80,7 @@ update_tables <- function(){
 # run the jobs -----------------------------------------------------------------
 batch_func <- function(i){
   library(dplyr)
-  # i <- 122
+  # i <- 32
   set.seed(6264175)
   (this_job <- all_jobs[i, ])
 
@@ -88,7 +88,7 @@ batch_func <- function(i){
                      this_job$Dataset, "_", 
                      this_job$Estimator,".csv"))
   
-  if (!filename %in% dir("replicationCode/9-results")) {
+  if (!substr(filename, 27, 1000) %in% dir("replicationCode/9-results")) {
     
     ds <- datasets_grid[[this_job$Dataset]]
     es <- estimator_grid[[this_job$Estimator]]
@@ -97,7 +97,8 @@ batch_func <- function(i){
       
     tm <- microbenchmark::microbenchmark({
       es_trnd <- es(Xobs = ds$train %>% dplyr::select(-y),
-                    Yobs = ds$train %>% dplyr::select(y) %>% .[,1])
+                    Yobs = ds$train %>% dplyr::select(y) %>% .[,1], 
+                    note = as.character(this_job$Dataset))
       pdctns <- pd(estimator = es_trnd,
                    feat = ds$test %>% dplyr::select(-y))
       EMSE <- mean((pdctns - ds$test %>% dplyr::select(y) %>% .[,1])^2)
@@ -121,18 +122,24 @@ batch_func <- function(i){
 # 51
 # 71
 all_jobs[c(11,32,74),]
-batch_func(32)
+batch_func(i = 34)
 
-Q(fun = batch_func,
-  n_jobs = nrow(all_jobs),
-  i = which(all_jobs$Estimator %in% c("forestry")), #1:nrow(all_jobs),
-  export = list(
-    datasets_grid = datasets_grid,
-    estimator_grid = estimator_grid,
-    predictor_grid = predictor_grid,
-    all_jobs = all_jobs,
-    update_tables = update_tables
-  ))
+readRDS("replicationCode/tuningParam/RidgeForestOzone_fold5.RDS")
+
+batch_func(11)
+batch_func(74)
+
+
+# Q(fun = batch_func,
+#   n_jobs = nrow(all_jobs),
+#   i = which(all_jobs$Estimator %in% c("forestry")), #1:nrow(all_jobs),
+#   export = list(
+#     datasets_grid = datasets_grid,
+#     estimator_grid = estimator_grid,
+#     predictor_grid = predictor_grid,
+#     all_jobs = all_jobs,
+#     update_tables = update_tables
+#   ))
 
 update_tables()
 
