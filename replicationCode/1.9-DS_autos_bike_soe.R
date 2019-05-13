@@ -27,27 +27,23 @@ autos %>%
          gearbox = factor(ifelse(is.na(gearbox),
                                  "unknown", as.character(gearbox))),
          fuelType = factor(ifelse(is.na(fuelType),
-                                  "unknown", as.character(fuelType)))) %>%
-  dplyr::select(-dateCrawled, -name, -offerType, -dateCreated, -lastSeen,
-         -notRepairedDamage, -seller, -nrOfPictures) %>%
+                                  "unknown", as.character(fuelType))))  %>%
   filter(price < 35000, price > 1000, powerPS < 500, powerPS > 50,
-         Damage != "unknown") ->
+         Damage != "unknown", brand == "volkswagen") %>%
+  dplyr::select(-dateCrawled, -name, -offerType, -dateCreated, -lastSeen,
+                -notRepairedDamage, -seller, -nrOfPictures, -brand) ->
   cars
 
 carmodels_tbl <- sort(table(cars$model), decreasing = TRUE)
 carmodels <- names(carmodels_tbl[carmodels_tbl > 300]); length(carmodels)
 
-carbrands_tbl <- sort(table(cars$brand), decreasing = TRUE)
-carbrands <- names(carbrands_tbl[carbrands_tbl > 300]); length(carbrands)
-
 
 cars <- cars %>%
-  filter(model %in% carmodels, brand %in% carbrands) %>%
+  filter(model %in% carmodels) %>%
   mutate(model = factor(model),
          abtest = factor(abtest),
          vehicleType = factor(vehicleType),
          gearbox = factor(gearbox),
-         brand = factor(brand),
          Damage = factor(Damage))
 
 apply(cars, 2, function(x) sum(is.na(x)))
@@ -57,7 +53,7 @@ dim(cars)
 
 n <- nrow(cars)
 
-test_id <- sort(sample(n, size = round(.95*n))); length(test_id)
+test_id <- sort(sample(n, size = round(.97*n))); length(test_id)
 train_id <- (1:n)[!(1:n) %in% test_id]; length(train_id)
 
 cars <- as.data.frame(cars)
@@ -90,7 +86,7 @@ summary(bike)
 
 n <- nrow(bike)
 
-test_id <- sort(sample(n, size = round(.85*n))); length(test_id)
+test_id <- sort(sample(n, size = round(.95*n))); length(test_id)
 train_id <- (1:n)[!(1:n) %in% test_id]; length(train_id)
 
 bike <- as.data.frame(bike)

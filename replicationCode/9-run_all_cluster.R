@@ -128,7 +128,7 @@ batch_func <- function(i){
 # 
 # batch_func(11)
 # batch_func(74)
-batch_func(i = 93)
+batch_func(i = 20)
 
 Q(fun = batch_func,
   n_jobs = nrow(all_jobs),
