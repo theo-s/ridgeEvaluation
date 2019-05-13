@@ -78,11 +78,9 @@ datasets_grid[["autos"]] <- list(
 bike <- read_csv("replicationCode/bike.csv")
 
 bike <- bike %>% 
-  dplyr::select(-instant,-dteday,-casual, -registered) %>%
+  dplyr::select(-instant,-dteday,-casual, -registered, -weekday, -season) %>%
   mutate(
-    season = factor(season),
     holiday = factor(holiday),
-    weekday = factor(weekday),
     workingday = factor(workingday),
     weathersit = factor(weathersit)
   )
@@ -99,8 +97,8 @@ bike <- as.data.frame(bike)
 colnames(bike)[ncol(bike)] <- "y"
 head(bike)
 datasets_grid[["bike"]] <- list(
-  "bike" = bike[train_id, ],
-  "bike" = bike[test_id, ])
+  "train" = bike[train_id, ],
+  "test" = bike[test_id, ])
 
 # str(datasets_grid)
 # print(names(datasets_grid))

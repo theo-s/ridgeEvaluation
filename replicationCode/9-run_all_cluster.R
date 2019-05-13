@@ -11,7 +11,7 @@ if (dir.exists("~/Dropbox/ridgeEvaluation/")) {
 }
 
 # install most up to date version of forestry
-devtools::install_github("soerenkuenzel/forestry", ref = "master")
+# devtools::install_github("soerenkuenzel/forestry", ref = "master")
 
 library(forestry)
 library(ranger)
@@ -80,13 +80,13 @@ update_tables <- function(){
 # run the jobs -----------------------------------------------------------------
 batch_func <- function(i){
   library(dplyr)
-  # i <- 45
+  # i <- 122
   set.seed(6264175)
   (this_job <- all_jobs[i, ])
 
-  filename <- paste0("replicationCode/9-results/job_", 
+  (filename <- paste0("replicationCode/9-results/job_", 
                      this_job$Dataset, "_", 
-                     this_job$Estimator,".csv")
+                     this_job$Estimator,".csv"))
   
   if (!filename %in% dir("replicationCode/9-results")) {
     
@@ -96,9 +96,9 @@ batch_func <- function(i){
     # run the current job this will save the results in 9-results/
       
     tm <- microbenchmark::microbenchmark({
-      es_trnd <- es(Xobs = ds$train %>% dplyr::select(-y), 
+      es_trnd <- es(Xobs = ds$train %>% dplyr::select(-y),
                     Yobs = ds$train %>% dplyr::select(y) %>% .[,1])
-      pdctns <- pd(estimator = es_trnd, 
+      pdctns <- pd(estimator = es_trnd,
                    feat = ds$test %>% dplyr::select(-y))
       EMSE <- mean((pdctns - ds$test %>% dplyr::select(y) %>% .[,1])^2)
     }, times = 1, unit = "s")
@@ -113,20 +113,28 @@ batch_func <- function(i){
     update_tables()
     
   }
+  return(filename)
 }
 
-all_jobs <- all_jobs[all_jobs$Estimator != "ranger", ]
+# 11
+# 21
+# 51
+# 71
+all_jobs[c(11,32,74),]
+batch_func(32)
 
 Q(fun = batch_func,
-  n_jobs = 36,
-  i = 1:nrow(all_jobs),
+  n_jobs = nrow(all_jobs),
+  i = which(all_jobs$Estimator %in% c("forestry")), #1:nrow(all_jobs),
   export = list(
-    datasets_grid = datasets_grid, 
-    estimator_grid = estimator_grid, 
+    datasets_grid = datasets_grid,
+    estimator_grid = estimator_grid,
     predictor_grid = predictor_grid,
-    all_jobs = all_jobs, 
+    all_jobs = all_jobs,
     update_tables = update_tables
   ))
+
+update_tables()
 
 read.csv("replicationCode/9-run_all_cluster_resultsEMSE.csv")
 read.csv("replicationCode/9-run_all_cluster_resultsRuntime.csv")

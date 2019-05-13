@@ -1,2 +1,2 @@
 "Dataset","Estimator","EMSE","runtime"
-"Abalone","glmnet",5.07355102682929,3.769156243
+"Abalone","glmnet",5.07355102682929,0.024319413

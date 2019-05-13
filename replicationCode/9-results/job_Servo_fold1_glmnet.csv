@@ -1,2 +1,2 @@
 "Dataset","Estimator","EMSE","runtime"
-"Servo_fold1","glmnet",1.06395392867272,3.642640653
+"Servo_fold1","glmnet",1.06395392867272,0.036349054

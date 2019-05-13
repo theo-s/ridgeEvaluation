@@ -35,14 +35,15 @@ datasets_grid[["Friedman_1"]] <- list(
 # Error SD selected to roughly give signal to noise ratio of 3:1
 x1 <- runif(n, min = 0, max = 100)
 x2 <- runif(n, min = 40*pi, max = 560*pi)
-x3 <- runif(n, min = 0, max = 1)
+x3 <- runif(n, min = 0.01, max = 1)
 x4 <- runif(n, min = 1, max = 11)
 
 x <- data.frame(x1, x2, x3, x4)
 
-y <- x[,1]^2 + (x[,2]*x[,3] - (1/(x[,2]*x[,3]))^2) ^(.5) + rnorm(n, mean = 0, sd = 600)
+y <-
+  x[, 1] ^ 2 + (x[, 2] * x[, 3] - (1 / (x[, 2] * x[, 3])) ^ 2) ^ (.5) + rnorm(n, mean = 0, sd = 600)
 friedman_2 <- cbind(x, y)
-
+summary(friedman_2)
 
 datasets_grid[["Friedman_2"]] <- list(
   "train" = friedman_2[train_id, ],
