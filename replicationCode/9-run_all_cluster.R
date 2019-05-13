@@ -128,11 +128,11 @@ batch_func <- function(i){
 # 
 # batch_func(11)
 # batch_func(74)
-batch_func(i = 20)
+# batch_func(i = 20)
 
 Q(fun = batch_func,
   n_jobs = nrow(all_jobs),
-  i = 1:nrow(all_jobs),
+  i = which(all_jobs$Estimator == "caretRidgeTree"),
   export = list(
     datasets_grid = datasets_grid,
     estimator_grid = estimator_grid,

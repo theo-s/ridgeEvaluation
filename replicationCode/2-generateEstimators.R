@@ -125,6 +125,8 @@ estimator_grid <- list(
                       
                       forestry(x = x,
                                y = y,
+                               replace = TRUE,
+                               sample.fraction = 1,
                                ridgeRF = TRUE,
                                ntree = param$ntree,
                                nodesizeSpl = 1,
