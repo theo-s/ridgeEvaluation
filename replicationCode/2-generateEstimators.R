@@ -26,7 +26,7 @@ estimator_grid <- list()
 #Tuning forestry RF ------------------------------------------------------------
 estimator_grid[["forestryRF"]] <- function(Xobs,
                                              Yobs,
-                                             tune_length = 50,
+                                             tune_length = 100,
                                              cv_fold = 8,
                                              note = NA) {
   library(forestry)
@@ -133,7 +133,7 @@ estimator_grid[["forestryRF"]] <- function(Xobs,
 #Tuning Ridge RF --------------------------------------------------------------
 estimator_grid[["caretRidgeRF"]] <- function(Xobs,
                                             Yobs,
-                                            tune_length = 50,
+                                            tune_length = 100,
                                             cv_fold = 8,
                                             note = NA) {
   library(forestry)
@@ -380,92 +380,26 @@ estimator_grid[["ranger"]] <- function(Xobs,
                                        tune_length = 100,
                                        cv_fold = 8,
                                        note = NA) {
-  # browser()
-  # Xobs = iris[,-1]
-  # Yobs = iris[,1]
   library(ranger)
   library(caret)
-  library(BradleyTerry2)
   
-  fitControl <- trainControl(
-    method = "adaptive_cv",
-    ## 5-fold CV
-    number = cv_fold,
-    ## repeated 5 times
-    repeats = 4,
-    adaptive = list(
-      min = 2,
-      alpha = 0.05,
-      method = "BT",
-      complete = TRUE
-    )
-  )
-  
-  grid <- function(x, y, len) {
-    paramGrid <-
-      data.frame(
-        mtry = sample(1:ncol(x), size = len, replace = TRUE),
-        splitrule = "variance",
-        min.node.size = create_random_node_sizes(nobs = nrow(x),
-                                                 len = len)
-      )
-    return(paramGrid)
-  }
-  
-  ranger_grid <- grid(Xobs, Yobs, tune_length)
-  tuned_ranger <- train(
-    Yobs ~ .,
-    data = cbind(Xobs, Yobs),
-    method = 'ranger',
-    metric = "RMSE",
-    tuneLength = tune_length,
-    trControl = fitControl,
-    tuneGrid = ranger_grid)
-  
-  # Save Tuning parameters ---------------------------------------------------
-  dir.create("replicationCode/tuningParam/", showWarnings = FALSE)
-  saveRDS(
-    object = list(tuned_ranger),
-    file = paste0("replicationCode/tuningParam/ranger", note, ".RDS")
-  )
-  
-  return(tuned_ranger$finalModel)
-}
-
-# Tuning glmnet ----------------------------------------------------------------
-estimator_grid[["glmnet"]] <- function(Xobs,
-                                       Yobs,
-                                       tune_length = 100,
-                                       cv_fold = 8,
-                                       note = NA) {
-  library(glmnet)
-  library(caret)
-  browser()
-  
-  encoder <- onehot::onehot(Xobs)
-  
-  Xobs <- predict(encoder, Xobs)
-  
-  
-  ridgeRF <- list(
+  rangerRF <- list(
     type = "Regression",
-    library = "glmnet",
+    library = "ranger",
     loop = NULL,
     parameters = data.frame(
       parameter = c(
         "mtry",
         "nodesizeStrictSpl",
-        "overfitPenalty",
-        "minSplitGain",
-        "ntree"
+        "ntree", 
+        "sample.fraction"
       ),
-      class = rep("numeric", 5),
+      class = rep("numeric", 4),
       label = c(
         "mtry",
         "nodesizeStrictSpl",
-        "overfitPenalty",
-        "minSplitGain",
-        "ntree"
+        "ntree",
+        "sample.fraction"
       )
     ),
     grid = function(x, y, len = NULL, search = "random") {
@@ -477,16 +411,8 @@ estimator_grid[["glmnet"]] <- function(Xobs,
           mtry = sample(1:ncol(x), size = len, replace = TRUE),
           nodesizeStrictSpl = create_random_node_sizes(nobs = nrow(x),
                                                        len = len),
-          # Might want to pass specific range/distribution for lambdas
-          overfitPenalty = exp(runif(
-            len,
-            min = log(.1),
-            max = log(10)
-          )),
-          minSplitGain = runif(len, 0, .5) ^
-            4,
-          ntree = 1
-        )
+          ntree = 500,
+          sample.fraction = runif(len, 0.5, 1))
       return(paramGrid)
     },
     fit = function(x,
@@ -497,68 +423,76 @@ estimator_grid[["glmnet"]] <- function(Xobs,
                    last,
                    weights,
                    classProbs) {
+
       print(param)
-      
-      glmnet(
-        x = x,
-        y = y,
-        replace = TRUE,
-        sample.fraction = 1,
-        ridgeRF = TRUE,
-        ntree = param$ntree,
-        nodesizeSpl = 1,
-        nodesizeAvg = 1,
-        nodesizeStrictAvg = 1,
-        nthread = 1,
-        nodesizeStrictSpl = param$nodesizeStrictSpl,
-        mtry = param$mtry,
-        overfitPenalty = param$overfitPenalty,
-        saveable = FALSE,
-        minSplitGain = param$minSplitGain
-      )
+
+      ranger(y ~ ., 
+             data = data.frame(x, y),
+             num.trees = param$ntree,
+             sample.fraction = param$sample.fraction,
+             min.node.size = param$nodesizeStrictSpl,
+             mtry = param$mtry
+             )
     },
     predict = function(modelFit,
                        newdata,
                        preProc = NULL,
                        submodels = NULL) {
-      predict(modelFit, newdata)
+
+      predict(modelFit, newdata)$predictions
     },
     prob = NULL
   )
   
-  
   fitControl <- trainControl(
     method = "adaptive_cv",
-    ## 5-fold CV
+    ## 8-fold CV
     number = cv_fold,
     ## repeated 5 times
-    repeats = 10,
+    repeats = 4,
     adaptive = list(
-      min = 5,
-      alpha = 0.02,
-      method = "BT",
+      min = 2,
+      alpha = 0.05,
+      method = "gls",
       complete = TRUE
     )
   )
   
-  tuned_glmnet <- train(
+  random_rf <- train(
     Yobs ~ .,
     data = cbind(Xobs, Yobs),
-    method = 'glmnet',
+    method = rangerRF,
     metric = "RMSE",
     tuneLength = tune_length,
-    trControl = fitControl, 
-    search = "random"
+    trControl = fitControl
   )
   
   # Save Tuning parameters ---------------------------------------------------
   dir.create("replicationCode/tuningParam/", showWarnings = FALSE)
   saveRDS(
-    object = list(tuned_glmnet),
-    file = paste0("replicationCode/tuningParam/glmnet", note, ".RDS")
+    object = list(random_rf),
+    file = paste0("replicationCode/tuningParam/rangerForest", note, ".RDS")
   )
   
-  return(list(model = tuned_glmnet$finalModel, encoder = encoder))
+  return(list("random_rf" = random_rf$finalModel))
+}
+
+# Tuning glmnet ----------------------------------------------------------------
+estimator_grid[["glmnet"]] <- function(Xobs,
+                                       Yobs,
+                                       tune_length = NA,
+                                       cv_fold = NA,
+                                       note = NA) {
+  library(glmnet)
+  library(caret)
+  
+  encoder <- onehot::onehot(Xobs)
+  Xobs <- predict(encoder, Xobs)
+  
+  
+  mod <- cv.glmnet(x = Xobs, y = Yobs)
+  
+  return(list(model = mod, encoder = encoder))
 }
 
 # Tuning cubist ----------------------------------------------------------------
@@ -567,7 +501,7 @@ estimator_grid[["cubist"]] <- function(Xobs,
                                        tune_length = 100,
                                        cv_fold = 8,
                                        note = NA) {
-  library(cubist)
+  library(Cubist)
   library(caret)
   
   encoder <- onehot::onehot(Xobs)
@@ -585,7 +519,8 @@ estimator_grid[["cubist"]] <- function(Xobs,
       alpha = 0.02,
       method = "BT",
       complete = TRUE
-    )
+    ), 
+    search = "random"
   )
   
   tuned_cubist <- train(
@@ -594,8 +529,7 @@ estimator_grid[["cubist"]] <- function(Xobs,
     method = 'cubist',
     metric = "RMSE",
     tuneLength = tune_length,
-    trControl = fitControl, 
-    search = "random"
+    trControl = fitControl
   )
   
   # Save Tuning parameters ---------------------------------------------------
@@ -619,6 +553,8 @@ estimator_grid[["local_RF"]] <- function(Xobs,
   library(onehot)
   encoder <- onehot(Xobs)
   Xobs <- predict(encoder, Xobs)
+  
+  minYobs <- min(Yobs)
   
   # llf <- local_linear_forest(
   #   X = predict(encoder, Xobs),
@@ -669,22 +605,28 @@ estimator_grid[["local_RF"]] <- function(Xobs,
                    weights,
                    classProbs) {
       print(param)
-      
-      local_linear_forest(
-        X = x,
-        Y = y,
-        num.threads = param$num.trees,
-        sample.fraction = param$sample.fraction,
-        nthread = 1,
-        min.node.size	 = param$min.node.size	,
-        mtry = param$mtry
-      )
+      mod <- NULL
+      tryCatch({
+        mod <- local_linear_forest(
+          X = x,
+          Y = y,
+          num.trees = param$num.trees,
+          sample.fraction = param$sample.fraction,
+          num.threads = 1,
+          min.node.size	 = param$min.node.size	,
+          mtry = param$mtry)
+        })
+      return(mod)
     },
     predict = function(modelFit,
                        newdata,
                        preProc = NULL,
                        submodels = NULL) {
-      predict(modelFit, newdata)$predictions
+      pred <- rep(minYobs, nrow(newdata))
+      
+      tryCatch(pred <- predict(modelFit, newdata)$predictions)
+      print(pred[1:5])
+      return(pred)
     },
     prob = NULL
   )
@@ -720,7 +662,7 @@ estimator_grid[["local_RF"]] <- function(Xobs,
     file = paste0("replicationCode/tuningParam/local_rf", note, ".RDS")
   )
   
-  return(list("random_rf" = local_rf$finalModel))
+  return(list("random_rf" = local_rf$finalModel, encoder))
 }
   
   
@@ -763,24 +705,25 @@ predictor_grid <- list(
   
   
   "glmnet" = function(estimator, feat) {
-    return(predict(estimator[[2]], 
-                   newdata = predict(estimator[[1]], feat)))
+    return(predict(estimator[[1]], 
+                   newx = predict(estimator[[2]], feat)) %>% as.numeric)
   },
   
   
   "local_RF" = function(estimator, feat) {
-    return(predict(estimator[[2]], 
-                   newdata = predict(estimator[[1]], feat))$predictions)
+    return(predict(estimator[[1]],
+                   newdata = predict(estimator[[2]], feat))[, 1])
   },
   
   
   "cubist" = function(estimator, feat) {
-    return(predict(estimator, feat))
+    return(predict(estimator[[1]], 
+                   newdata = predict(estimator[[2]], feat)) %>% as.numeric)
   }, 
   
   "BART" = function(estimator, feat) {
     library(dbarts)
-    bartFit = wbart(x.train = estimator$Xobs,
+    bartFit = bart(x.train = estimator$Xobs,
                     y.train = estimator$Yobs,
                     x.test = feat)
     
