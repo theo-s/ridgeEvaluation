@@ -117,7 +117,7 @@ batch_func <- function(i){
   return(filename)
 }
 
-all_jobs[(0:7) * 21 + 1, ]
+# all_jobs[(0:7) * 21 + 1, ]
 # 1 OK
 # 22 OK
 # 43 OK
@@ -126,25 +126,25 @@ all_jobs[(0:7) * 21 + 1, ]
 # 106 OK
 # 127 OK
 # 148 OK
-batch_func(i = 64)
+# batch_func(i = 64)
 # 
 # readRDS("replicationCode/tuningParam/RidgeForestOzone_fold5.RDS")
 
 
 # Q(fun = batch_func,
 #   n_jobs = nrow(all_jobs),
-#   i = which(all_jobs$Estimator == "caretRidgeTree"),
+#   i = 1:nrow(all_jobs),
 #   export = list(
 #     datasets_grid = datasets_grid,
 #     estimator_grid = estimator_grid,
 #     predictor_grid = predictor_grid,
 #     all_jobs = all_jobs,
-#     update_tables = update_tables, 
+#     update_tables = update_tables,
 #     create_random_node_sizes = create_random_node_sizes
 #   ))
-# 
-# update_tables()
-# 
-# read.csv("replicationCode/9-run_all_cluster_resultsEMSE.csv")
-# read.csv("replicationCode/9-run_all_cluster_resultsRuntime.csv")
+
+update_tables()
+
+read.csv("replicationCode/9-run_all_cluster_resultsEMSE.csv")
+read.csv("replicationCode/9-run_all_cluster_resultsRuntime.csv")
 # 
