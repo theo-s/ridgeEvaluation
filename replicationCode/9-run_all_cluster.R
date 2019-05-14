@@ -117,6 +117,15 @@ batch_func <- function(i){
   return(filename)
 }
 
+all_jobs[(0:7) * 21 + 1, ]
+# 1 OK
+# 22 OK
+# 43 OK
+# 64 NOOOOOOO
+# 85
+# 106
+# 127
+batch_func(i = 85)
 # 11
 # 21
 # 51
@@ -125,12 +134,12 @@ batch_func <- function(i){
 # batch_func(i = 34)
 # 
 # readRDS("replicationCode/tuningParam/RidgeForestOzone_fold5.RDS")
-# 
-# batch_func(11)
+
+batch_func(11)
 # batch_func(74)
 # batch_func(i = 20)
 
-Q(fun = batch_func,
+# Q(fun = batch_func,
   n_jobs = nrow(all_jobs),
   i = which(all_jobs$Estimator == "caretRidgeTree"),
   export = list(
