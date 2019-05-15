@@ -104,10 +104,10 @@ estimator_grid[["forestryRF"]] <- function(Xobs,
     ## repeated 5 times
     repeats = 4,
     adaptive = list(
-      min = 2,
-      alpha = 0.05,
+      min = 5,
+      alpha = 0.01,
       method = "gls",
-      complete = TRUE
+      complete = FALSE
     )
   )
   
@@ -226,10 +226,10 @@ estimator_grid[["caretRidgeRF"]] <- function(Xobs,
     ## repeated 5 times
     repeats = 4,
     adaptive = list(
-      min = 2,
-      alpha = 0.05,
+      min = 5,
+      alpha = 0.01,
       method = "gls",
-      complete = TRUE
+      complete = FALSE
     )
   )
   
@@ -347,10 +347,10 @@ estimator_grid[["caretRidgeTree"]] <- function(Xobs,
     ## repeated 5 times
     repeats = 4,
     adaptive = list(
-      min = 2,
-      alpha = 0.05,
+      min = 5,
+      alpha = 0.01,
       method = "gls",
-      complete = TRUE
+      complete = FALSE
     )
   )
   
@@ -450,10 +450,10 @@ estimator_grid[["ranger"]] <- function(Xobs,
     ## repeated 5 times
     repeats = 4,
     adaptive = list(
-      min = 2,
-      alpha = 0.05,
+      min = 5,
+      alpha = 0.01,
       method = "gls",
-      complete = TRUE
+      complete = FALSE
     )
   )
   
@@ -512,12 +512,12 @@ estimator_grid[["cubist"]] <- function(Xobs,
     ## 5-fold CV
     number = cv_fold,
     ## repeated 5 times
-    repeats = 10,
+    repeats = 4,
     adaptive = list(
       min = 5,
-      alpha = 0.02,
-      method = "BT",
-      complete = TRUE
+      alpha = 0.01,
+      method = "gls",
+      complete = FALSE
     ), 
     search = "random"
   )
@@ -635,10 +635,10 @@ estimator_grid[["local_RF"]] <- function(Xobs,
     ## repeated 5 times
     repeats = 4,
     adaptive = list(
-      min = 2,
-      alpha = 0.05,
+      min = 5,
+      alpha = 0.01,
       method = "gls",
-      complete = TRUE
+      complete = FALSE
     )
   )
   
