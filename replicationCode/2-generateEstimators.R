@@ -112,8 +112,8 @@ estimator_grid[["forestryRF"]] <- function(Xobs,
   )
   
   random_rf <- train(
-    Yobs ~ .,
-    data = cbind(Xobs, Yobs),
+    y = Yobs, 
+    x = Xobs, 
     method = forestryRF,
     metric = "RMSE",
     tuneLength = tune_length,
@@ -234,8 +234,8 @@ estimator_grid[["caretRidgeRF"]] <- function(Xobs,
   )
   
   random_rf <- train(
-    Yobs ~ .,
-    data = cbind(Xobs, Yobs),
+    y = Yobs, 
+    x = Xobs, 
     method = ridgeRF,
     metric = "RMSE",
     tuneLength = tune_length,
@@ -355,8 +355,8 @@ estimator_grid[["caretRidgeTree"]] <- function(Xobs,
   )
   
   random_rf <- train(
-    Yobs ~ .,
-    data = cbind(Xobs, Yobs),
+    y = Yobs, 
+    x = Xobs, 
     method = ridgeRF,
     metric = "RMSE",
     tuneLength = tune_length,
@@ -523,8 +523,8 @@ estimator_grid[["cubist"]] <- function(Xobs,
   )
   
   tuned_cubist <- train(
-    Yobs ~ .,
-    data = cbind(Xobs, Yobs),
+    y = Yobs, 
+    x = Xobs, 
     method = 'cubist',
     metric = "RMSE",
     tuneLength = tune_length,
@@ -643,8 +643,8 @@ estimator_grid[["local_RF"]] <- function(Xobs,
   )
   
   local_rf <- train(
-    Yobs ~ .,
-    data = cbind(Xobs, Yobs),
+    y = Yobs, 
+    x = Xobs, 
     method = local_RF,
     metric = "RMSE",
     tuneLength = tune_length,
@@ -720,8 +720,8 @@ predictor_grid <- list(
   "BART" = function(estimator, feat) {
     library(dbarts)
     bartFit = bart(x.train = estimator$Xobs,
-                    y.train = estimator$Yobs,
-                    x.test = feat)
+                   y.train = estimator$Yobs,
+                   x.test = feat)
     
     return(bartFit$yhat.train.mean)
   }
