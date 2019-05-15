@@ -721,9 +721,9 @@ predictor_grid <- list(
     library(dbarts)
     bartFit = bart(x.train = estimator$Xobs,
                    y.train = estimator$Yobs,
-                   x.test = feat)
+                   x.test = feat, )
     
-    return(bartFit$yhat.train.mean)
+    return(bartFit$yhat.test.mean)
   }
 )
 
