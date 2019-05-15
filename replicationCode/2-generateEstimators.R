@@ -26,7 +26,7 @@ estimator_grid <- list()
 #Tuning forestry RF ------------------------------------------------------------
 estimator_grid[["forestryRF"]] <- function(Xobs,
                                              Yobs,
-                                             tune_length = 100,
+                                             tune_length = 200,
                                              cv_fold = 8,
                                              note = NA) {
   library(forestry)
@@ -133,7 +133,7 @@ estimator_grid[["forestryRF"]] <- function(Xobs,
 #Tuning Ridge RF --------------------------------------------------------------
 estimator_grid[["caretRidgeRF"]] <- function(Xobs,
                                             Yobs,
-                                            tune_length = 100,
+                                            tune_length = 200,
                                             cv_fold = 8,
                                             note = NA) {
   library(forestry)
@@ -255,7 +255,7 @@ estimator_grid[["caretRidgeRF"]] <- function(Xobs,
 # Tune Ridge Tree --------------------------------------------------------------
 estimator_grid[["caretRidgeTree"]] <- function(Xobs,
                                                Yobs,
-                                               tune_length = 100,
+                                               tune_length = 200,
                                                cv_fold = 8,
                                                note = NA) {
   library(forestry)
@@ -377,7 +377,7 @@ estimator_grid[["caretRidgeTree"]] <- function(Xobs,
 # Tune ranger --------------------------------------------------------------
 estimator_grid[["ranger"]] <- function(Xobs,
                                        Yobs,
-                                       tune_length = 100,
+                                       tune_length = 200,
                                        cv_fold = 8,
                                        note = NA) {
   library(ranger)
@@ -497,7 +497,7 @@ estimator_grid[["glmnet"]] <- function(Xobs,
 # Tuning cubist ----------------------------------------------------------------
 estimator_grid[["cubist"]] <- function(Xobs,
                                        Yobs,
-                                       tune_length = 100,
+                                       tune_length = 200,
                                        cv_fold = 8,
                                        note = NA) {
   library(Cubist)
@@ -544,7 +544,7 @@ estimator_grid[["cubist"]] <- function(Xobs,
 # Tuning localRF ---------------------------------------------------------------
 estimator_grid[["local_RF"]] <- function(Xobs,
                                          Yobs,
-                                         tune_length = 100,
+                                         tune_length = 200,
                                          cv_fold = 8,
                                          note = NA) {
   library(grf)
@@ -721,8 +721,7 @@ predictor_grid <- list(
     library(dbarts)
     bartFit = bart(x.train = estimator$Xobs,
                    y.train = estimator$Yobs,
-                   x.test = feat, )
-    
+                   x.test = feat)
     return(bartFit$yhat.test.mean)
   }
 )

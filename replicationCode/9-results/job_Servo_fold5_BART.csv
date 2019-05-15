@@ -1,2 +1,2 @@
 "Dataset","Estimator","EMSE","runtime"
-"Servo_fold5","BART",0.701957836583406,0.979603225
+"Servo_fold5","BART",0.571554383114982,0.884125655

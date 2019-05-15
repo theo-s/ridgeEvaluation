@@ -17,15 +17,15 @@ set.seed(3984938)
 # Simulated Datasets -----------------------------------------------------------
 
 # Friedman 1
-n <- 2200
+n <- 3000
 x <- matrix(runif(10 * n), nrow = n, ncol = 10)
 x <- as.data.frame(x)
 
 y <- 10*sin(pi*x[,1]*x[,2]) + 20*(x[,3] - .5)^2 + 10*x[,4] + 5*x[,5] + rnorm(n, sd = 1)
 friedman_1 <- cbind(x, y)
 
-test_id <- 201:2200
-train_id <- 1:200
+test_id <- 1001:3000
+train_id <- 1:1000
 
 datasets_grid[["Friedman_1"]] <- list(
   "train" = friedman_1[train_id, ],

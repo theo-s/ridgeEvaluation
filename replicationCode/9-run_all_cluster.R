@@ -36,6 +36,7 @@ dir.create(data_folder_name, showWarnings = FALSE)
 set.seed(5387479) 
 #source("replicationCode/1.5-generateDataBigtest.R")
 source("replicationCode/2-generateEstimators.R")
+source("replicationCode/2.1-generateEstimators_RRF.R")
 source("replicationCode/1.8-generateDataBrieman.R")
 source("replicationCode/1.9-DS_autos_bike_soe.R")
 # generate all the different jobs and save it ----------------------------------
@@ -95,7 +96,6 @@ batch_func <- function(i, force = FALSE){
     es <- estimator_grid[[as.character(this_job$Estimator)]]
     pd <- predictor_grid[[as.character(this_job$Estimator)]]
     # run the current job this will save the results in 9-results/
-      
     tm <- microbenchmark::microbenchmark({
       es_trnd <- es(Xobs = ds$train %>% dplyr::select(-y),
                     Yobs = ds$train %>% dplyr::select(y) %>% .[,1], 
@@ -130,12 +130,16 @@ batch_func <- function(i, force = FALSE){
 # batch_func(i = 64)
 # 
 # readRDS("replicationCode/tuningParam/RidgeForestOzone_fold5.RDS")
-batch_func(i = 22, force = TRUE)
-
+# batch_func(i = 22, force = TRUE)
+# for (i in which(all_jobs$Estimator ==  "BART")) {
+#   batch_func(i = i, force = TRUE)
+# }
 
 # Q(fun = batch_func,
 #   n_jobs = nrow(all_jobs),
-#   i = 1:nrow(all_jobs),
+#   i = which(all_jobs$Estimator %in% c("caretRidgeRF_noMinSplitGain", 
+#                                       "caretRidgeRF_BT", 
+#                                       "caretRidgeTree_moreSplit")),
 #   export = list(
 #     datasets_grid = datasets_grid,
 #     estimator_grid = estimator_grid,
@@ -149,4 +153,7 @@ update_tables()
 
 read.csv("replicationCode/9-run_all_cluster_resultsEMSE.csv")
 read.csv("replicationCode/9-run_all_cluster_resultsRuntime.csv")
+
+readRDS("replicationCode/tuningParam/RidgeTreeBoston_Housing_fold1.RDS")
+# readRDS("replicationCode/tuningParam/RidgeForestBoston_Housing_fold1.RDS")
 # 
