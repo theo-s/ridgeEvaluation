@@ -382,7 +382,6 @@ estimator_grid[["ranger"]] <- function(Xobs,
                                        note = NA) {
   library(ranger)
   library(caret)
-  
   rangerRF <- list(
     type = "Regression",
     library = "ranger",
@@ -459,8 +458,8 @@ estimator_grid[["ranger"]] <- function(Xobs,
   )
   
   random_rf <- train(
-    Yobs ~ .,
-    data = cbind(Xobs, Yobs),
+    y = Yobs, 
+    x = Xobs, 
     method = rangerRF,
     metric = "RMSE",
     tuneLength = tune_length,
@@ -622,11 +621,8 @@ estimator_grid[["local_RF"]] <- function(Xobs,
                        newdata,
                        preProc = NULL,
                        submodels = NULL) {
-      pred <- rep(minYobs, nrow(newdata))
+      predict(modelFit, newdata)$predictions
       
-      tryCatch(pred <- predict(modelFit, newdata)$predictions)
-      print(pred[1:5])
-      return(pred)
     },
     prob = NULL
   )
@@ -700,7 +696,7 @@ predictor_grid <- list(
   
   
   "ranger" = function(estimator, feat) {
-    return(predict(estimator, feat)$predictions)
+    return(predict(estimator[[1]], feat)$predictions)
   },
   
   

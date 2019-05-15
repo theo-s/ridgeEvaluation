@@ -111,6 +111,7 @@ train_id <- (1:n)[!(1:n) %in% test_id]
 
 
 colnames(servo)[ncol(servo)] <- "y"
+colnames(servo)[1:(ncol(servo) - 1)] <- paste0("x", 1:(ncol(servo) - 1))
 n <- nrow(servo)
 
 flds <- caret::createFolds(servo$y, k = 5, list = TRUE, returnTrain = FALSE)
@@ -131,7 +132,7 @@ for (i in 1:length(flds)) {
 n <- nrow(abalone)
 
 colnames(abalone)[ncol(abalone)] <- "y"
-
+colnames(abalone)[1:(ncol(abalone) - 1)] <- paste0("x", 1:(ncol(abalone) - 1))
 
 test_id <- sort(sample(n, size = round(.5*n))); length(test_id)
 train_id <- (1:n)[!(1:n) %in% test_id]; length(train_id)
