@@ -130,20 +130,20 @@ batch_func <- function(i, force = FALSE){
 # batch_func(i = 64)
 # 
 # readRDS("replicationCode/tuningParam/RidgeForestOzone_fold5.RDS")
-batch_func(i = 22, force = TRUE)
+# batch_func(i = 22, force = TRUE)
 
 
-# Q(fun = batch_func,
-#   n_jobs = nrow(all_jobs),
-#   i = 1:nrow(all_jobs),
-#   export = list(
-#     datasets_grid = datasets_grid,
-#     estimator_grid = estimator_grid,
-#     predictor_grid = predictor_grid,
-#     all_jobs = all_jobs,
-#     update_tables = update_tables,
-#     create_random_node_sizes = create_random_node_sizes
-#   ))
+Q(fun = batch_func,
+  n_jobs = nrow(all_jobs),
+  i = 1:nrow(all_jobs),
+  export = list(
+    datasets_grid = datasets_grid,
+    estimator_grid = estimator_grid,
+    predictor_grid = predictor_grid,
+    all_jobs = all_jobs,
+    update_tables = update_tables,
+    create_random_node_sizes = create_random_node_sizes
+  ))
 
 update_tables()
 
