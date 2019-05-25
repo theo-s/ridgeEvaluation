@@ -41,7 +41,14 @@ x4 <- runif(n, min = 1, max = 11)
 x <- data.frame(x1, x2, x3, x4)
 
 y <-
-  x[, 1] ^ 2 + (x[, 2] * x[, 3] - (1 / (x[, 2] * x[, 3])) ^ 2) ^ (.5) + rnorm(n, mean = 0, sd = 600)
+  x[, 1] ^ 2 + (x[, 2] * x[, 3] - (1 / (x[, 2] * x[, 3])) ^ 2) ^ (.5)
+
+noise <- rnorm(n)
+
+ratio <- sqrt(var(y)/(3*var(noise)))
+
+y <- y + ratio * noise
+
 friedman_2 <- cbind(x, y)
 summary(friedman_2)
 
@@ -49,10 +56,17 @@ datasets_grid[["Friedman_2"]] <- list(
   "train" = friedman_2[train_id, ],
   "test" = friedman_2[test_id, ])
 
-# Friedman 1
+# Friedman 3
 # Error SD selected to roughly give signal to noise ratio of 3:1
 
-y <- atan( (x[,2]*x[,3] - (1/(x[,2]*x[,4]) )) / x[,1]) + rnorm(n, mean = 0, sd = .3)
+y <- atan( (x[,2]*x[,3] - (1/(x[,2]*x[,4]) )) / x[,1])
+
+noise <- rnorm(n)
+
+ratio <- sqrt(var(y)/(3*var(noise)))
+
+y <- y + ratio * noise
+
 friedman_3 <- cbind(x, y)
 
 
