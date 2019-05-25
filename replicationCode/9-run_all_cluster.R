@@ -134,6 +134,7 @@ batch_func <- function(i, force = FALSE){
 # for (i in which(all_jobs$Estimator ==  "BART")) {
 #   batch_func(i = i, force = TRUE)
 # }
+<<<<<<< HEAD
 
 Q(fun = batch_func,
   n_jobs = nrow(all_jobs),
@@ -148,10 +149,46 @@ Q(fun = batch_func,
   ))
 
 update_tables()
-
 read.csv("replicationCode/9-run_all_cluster_resultsEMSE.csv")
 read.csv("replicationCode/9-run_all_cluster_resultsRuntime.csv")
 
-readRDS("replicationCode/tuningParam/RidgeTreeBoston_Housing_fold1.RDS")
-# readRDS("replicationCode/tuningParam/RidgeForestBoston_Housing_fold1.RDS")
+
+X <- read.csv("replicationCode/9-run_all_cluster_resultsEMSE.csv", stringsAsFactors = FALSE)
+X$Dataset <- gsub(pattern = "_fold[12345]", replacement = "", x = X$Dataset)
+
+X %>%
+  group_by(Dataset) %>%
+  summarize(forestryRF = mean(forestryRF),
+            caretRidgeRF = mean(caretRidgeRF),
+            caretRidgeTree = mean(caretRidgeTree),
+            ranger = mean(ranger),
+            glmnet = mean(glmnet),
+            cubist = mean(cubist),
+            local_RF = mean(local_RF),
+            BART = mean(BART),
+            caretRidgeRF_BT = mean(caretRidgeRF_BT),
+            caretRidgeRF_noMinSplitGain = mean(caretRidgeRF_noMinSplitGain),
+            caretRidgeTree_moreSplit = mean(caretRidgeTree_moreSplit))%>%
+  dplyr::rename(RF_forestry = forestryRF,
+                Ridge_RF = caretRidgeRF,
+                Ridge_Tree = caretRidgeTree,
+                RF_ranger = ranger) %>%
+  dplyr::select(Dataset, RF_forestry, RF_ranger, glmnet, BART, cubist,
+                Ridge_Tree, local_RF, Ridge_RF, everything()) -> X
+X[,-1] <- sqrt(X[,-1])
+X <- X %>% as.data.frame()
+# X[,-1] <- round(X[,-1] / apply(X[,-1], 1, function(x) min(x, na.rm = TRUE)), 2)
+X[,-1] <- round(X[,-1] / X$Ridge_RF, 3)
+X
+tt <- readRDS("replicationCode/tuningParam/RidgeForestServo_fold5.RDS")
+str(tt)
+g <- tt[[1]]
+b <- g$results
+b %>% arrange(-.B)
+b %>% arrange(-RMSE)
+b %>% arrange(-.B, RMSE) %>% head(10)
+b %>% arrange(-.B, RMSE) %>% tail(10)
 # 
+# readRDS("replicationCode/tuningParam/local_rfFriedman_2.RDS")
+# # readRDS("replicationCode/tuningParam/RidgeForestBoston_Housing_fold1.RDS")
+# # 
