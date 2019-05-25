@@ -135,19 +135,17 @@ batch_func <- function(i, force = FALSE){
 #   batch_func(i = i, force = TRUE)
 # }
 
-# Q(fun = batch_func,
-#   n_jobs = nrow(all_jobs),
-#   i = which(all_jobs$Estimator %in% c("caretRidgeRF_noMinSplitGain", 
-#                                       "caretRidgeRF_BT", 
-#                                       "caretRidgeTree_moreSplit")),
-#   export = list(
-#     datasets_grid = datasets_grid,
-#     estimator_grid = estimator_grid,
-#     predictor_grid = predictor_grid,
-#     all_jobs = all_jobs,
-#     update_tables = update_tables,
-#     create_random_node_sizes = create_random_node_sizes
-#   ))
+Q(fun = batch_func,
+  n_jobs = nrow(all_jobs),
+  i = 1:nrow(all_jobs),
+  export = list(
+    datasets_grid = datasets_grid,
+    estimator_grid = estimator_grid,
+    predictor_grid = predictor_grid,
+    all_jobs = all_jobs,
+    update_tables = update_tables,
+    create_random_node_sizes = create_random_node_sizes
+  ))
 
 update_tables()
 
