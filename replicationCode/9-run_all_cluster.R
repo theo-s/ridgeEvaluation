@@ -135,7 +135,6 @@ batch_func <- function(i, force = FALSE){
 # for (i in which(all_jobs$Estimator ==  "BART")) {
 #   batch_func(i = i, force = TRUE)
 # }
-<<<<<<< HEAD
 
 Q(fun = batch_func,
   n_jobs = nrow(all_jobs),

@@ -386,7 +386,7 @@ predictor_grid[["caretRidgeTree_moreSplit"]] <-
 
 
 
-
+if (FALSE) {
 # RidgeRF nonstrict leaf size tuned --------------------------------------------
 estimator_grid[["caretRidgeRF_nonstrict"]] <- function(Xobs,
                                                 Yobs,
@@ -515,3 +515,4 @@ predictor_grid[["caretRidgeRF_nonstrict"]] <-
   function(estimator, feat) {
     return(predict(estimator, feat)$random_rf)
   }
+}
