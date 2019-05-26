@@ -25,10 +25,10 @@ estimator_grid <- list()
 
 #Tuning forestry RF ------------------------------------------------------------
 estimator_grid[["forestryRF"]] <- function(Xobs,
-                                             Yobs,
-                                             tune_length = 200,
-                                             cv_fold = 8,
-                                             note = NA) {
+                                           Yobs,
+                                           tune_length = 200,
+                                           cv_fold = 8,
+                                           note = NA) {
   library(forestry)
   library(caret)
   
@@ -104,7 +104,7 @@ estimator_grid[["forestryRF"]] <- function(Xobs,
     ## repeated 5 times
     repeats = 4,
     adaptive = list(
-      min = 5,
+      min = 3,
       alpha = 0.01,
       method = "gls",
       complete = FALSE
@@ -132,10 +132,10 @@ estimator_grid[["forestryRF"]] <- function(Xobs,
 
 #Tuning Ridge RF --------------------------------------------------------------
 estimator_grid[["caretRidgeRF"]] <- function(Xobs,
-                                            Yobs,
-                                            tune_length = 200,
-                                            cv_fold = 8,
-                                            note = NA) {
+                                             Yobs,
+                                             tune_length = 200,
+                                             cv_fold = 8,
+                                             note = NA) {
   library(forestry)
   library(caret)
   
@@ -226,7 +226,7 @@ estimator_grid[["caretRidgeRF"]] <- function(Xobs,
     ## repeated 5 times
     repeats = 4,
     adaptive = list(
-      min = 5,
+      min = 3,
       alpha = 0.01,
       method = "gls",
       complete = FALSE
@@ -347,7 +347,7 @@ estimator_grid[["caretRidgeTree"]] <- function(Xobs,
     ## repeated 5 times
     repeats = 4,
     adaptive = list(
-      min = 5,
+      min = 3,
       alpha = 0.01,
       method = "gls",
       complete = FALSE
@@ -373,7 +373,7 @@ estimator_grid[["caretRidgeTree"]] <- function(Xobs,
   
   return(list("random_rf" = random_rf$finalModel))
 }
-  
+
 # Tune ranger --------------------------------------------------------------
 estimator_grid[["ranger"]] <- function(Xobs,
                                        Yobs,
@@ -422,22 +422,22 @@ estimator_grid[["ranger"]] <- function(Xobs,
                    last,
                    weights,
                    classProbs) {
-
+      
       print(param)
-
+      
       ranger(y ~ ., 
              data = data.frame(x, y),
              num.trees = param$ntree,
              sample.fraction = param$sample.fraction,
              min.node.size = param$nodesizeStrictSpl,
              mtry = param$mtry
-             )
+      )
     },
     predict = function(modelFit,
                        newdata,
                        preProc = NULL,
                        submodels = NULL) {
-
+      
       predict(modelFit, newdata)$predictions
     },
     prob = NULL
@@ -450,7 +450,7 @@ estimator_grid[["ranger"]] <- function(Xobs,
     ## repeated 5 times
     repeats = 4,
     adaptive = list(
-      min = 5,
+      min = 3,
       alpha = 0.01,
       method = "gls",
       complete = FALSE
@@ -479,8 +479,8 @@ estimator_grid[["ranger"]] <- function(Xobs,
 # Tuning glmnet ----------------------------------------------------------------
 estimator_grid[["glmnet"]] <- function(Xobs,
                                        Yobs,
-                                       tune_length = NA,
-                                       cv_fold = NA,
+                                       tune_length = 200,
+                                       cv_fold = 8,
                                        note = NA) {
   library(glmnet)
   library(caret)
@@ -488,10 +488,89 @@ estimator_grid[["glmnet"]] <- function(Xobs,
   encoder <- onehot::onehot(Xobs)
   Xobs <- predict(encoder, Xobs)
   
+  glmnet_fit <- list(
+    type = "Regression",
+    library = "glmnet",
+    loop = NULL,
+    parameters = data.frame(
+      parameter = c(
+        "alpha",
+        "lambda"
+      ),
+      class = rep("numeric", 2),
+      label = c(
+        "alpha",
+        "lambda"
+      )
+    ),
+    grid = function(x, y, len = NULL, search = "random") {
+      ## Define ranges for the parameters and
+      ## generate random values for them
+      
+      paramGrid <-
+        data.frame(
+          alpha = runif(len, 0, 1),
+          lambda = exp(runif(len, min = log(.1), max = log(10)))
+        )
+      return(paramGrid)
+    },
+    fit = function(x,
+                   y,
+                   wts,
+                   param,
+                   lev = NULL,
+                   last,
+                   weights,
+                   classProbs) {
+      print(param)
+      
+      glmnet(x = Xobs,
+             y = Yobs,
+             lambda = param$lambda,
+             alpha = param$alpha)
+      
+    },
+    predict = function(modelFit,
+                       newdata,
+                       preProc = NULL,
+                       submodels = NULL) {
+      predict(modelFit, newdata)
+    },
+    prob = NULL
+  )
   
-  mod <- cv.glmnet(x = Xobs, y = Yobs)
+  fitControl <- trainControl(
+    method = "adaptive_cv",
+    ## 5-fold CV
+    number = cv_fold,
+    ## repeated 5 times
+    repeats = 4,
+    adaptive = list(
+      min = 3,
+      alpha = 0.01,
+      method = "gls",
+      complete = FALSE
+    ), 
+    search = "random"
+  )
   
-  return(list(model = mod, encoder = encoder))
+  tuned_glmnet <- train(
+    y = Yobs, 
+    x = Xobs, 
+    method = glmnet_fit,
+    metric = "RMSE",
+    tuneLength = tune_length,
+    trControl = fitControl
+  )
+  
+  # Save Tuning parameters -----------------------------------------------------
+  dir.create("replicationCode/tuningParam/", showWarnings = FALSE)
+  saveRDS(
+    object = list(tuned_glmnet),
+    file = paste0("replicationCode/tuningParam/glmnet", note, ".RDS")
+  )
+  
+  return(list(model = tuned_glmnet$finalModel, encoder = encoder))
 }
 
 # Tuning cubist ----------------------------------------------------------------
@@ -507,6 +586,60 @@ estimator_grid[["cubist"]] <- function(Xobs,
   
   Xobs <- predict(encoder, Xobs)
   
+  cubist_fit <- list(
+    type = "Regression",
+    library = "Cubist",
+    loop = NULL,
+    parameters = data.frame(
+      parameter = c(
+        "committees",
+        "extrapolation",
+        "sample"
+      ),
+      class = rep("numeric", 3),
+      label = c(
+        "committees",
+        "extrapolation",
+        "sample"
+      )
+    ),
+    grid = function(x, y, len = NULL, search = "random") {
+      ## Define ranges for the parameters and
+      ## generate random values for them
+      
+      paramGrid <-
+        data.frame(
+          committees = sample(1:100, size = len, replace = TRUE),
+          extrapolation = sample(1:100, size = len, replace = TRUE),
+          sample = runif(len, 0.5, 1))
+      return(paramGrid)
+    },
+    fit = function(x,
+                   y,
+                   wts,
+                   param,
+                   lev = NULL,
+                   last,
+                   weights,
+                   classProbs) {
+      print(param)
+      
+      cubist(x = Xobs,
+             y = Yobs, 
+             committees = param$committees,
+             control = cubistControl(extrapolation = param$extrapolation,
+                                     sample = param$sample))
+      
+    },
+    predict = function(modelFit,
+                       newdata,
+                       preProc = NULL,
+                       submodels = NULL) {
+      predict(modelFit, newdata)
+    },
+    prob = NULL
+  )
+  
   fitControl <- trainControl(
     method = "adaptive_cv",
     ## 5-fold CV
@@ -514,7 +647,7 @@ estimator_grid[["cubist"]] <- function(Xobs,
     ## repeated 5 times
     repeats = 4,
     adaptive = list(
-      min = 5,
+      min = 3,
       alpha = 0.01,
       method = "gls",
       complete = FALSE
@@ -525,7 +658,7 @@ estimator_grid[["cubist"]] <- function(Xobs,
   tuned_cubist <- train(
     y = Yobs, 
     x = Xobs, 
-    method = 'cubist',
+    method = cubist_fit,
     metric = "RMSE",
     tuneLength = tune_length,
     trControl = fitControl
@@ -589,7 +722,7 @@ estimator_grid[["local_RF"]] <- function(Xobs,
         data.frame(
           mtry = sample(1:ncol(x), size = len, replace = TRUE),
           min.node.size	 = create_random_node_sizes(nobs = nrow(x),
-                                                       len = len),
+                                                    len = len),
           num.trees = 500,
           sample.fraction = runif(len, 0.5, 1))
       print(paramGrid)
@@ -614,7 +747,7 @@ estimator_grid[["local_RF"]] <- function(Xobs,
           num.threads = 1,
           min.node.size	 = param$min.node.size	,
           mtry = param$mtry)
-        })
+      })
       return(mod)
     },
     predict = function(modelFit,
@@ -635,7 +768,7 @@ estimator_grid[["local_RF"]] <- function(Xobs,
     ## repeated 5 times
     repeats = 4,
     adaptive = list(
-      min = 5,
+      min = 3,
       alpha = 0.01,
       method = "gls",
       complete = FALSE
@@ -660,16 +793,113 @@ estimator_grid[["local_RF"]] <- function(Xobs,
   
   return(list("random_rf" = local_rf$finalModel, encoder))
 }
-  
-  
+
+
 # Tuning BART ----------------------------------------------------------------
 estimator_grid[["BART"]] <- function(Xobs,
                                      Yobs,
-                                     tune_length = NA,
-                                     cv_fold = NA,
+                                     tune_length = 200,
+                                     cv_fold = 8,
                                      note = NA) {
   
-  return(list(Xobs = Xobs, Yobs = Yobs))
+  library(dbarts)
+  library(caret)
+  
+  
+  bartFit <- list(
+    type = "Regression",
+    library = "dbarts",
+    loop = NULL,
+    parameters = data.frame(
+      parameter = c(
+        "base",
+        "power",
+        "ntree", 
+        "sigdf"
+      ),
+      class = rep("numeric", 4),
+      label = c(
+        "base",
+        "power",
+        "ntree",
+        "sigdf"
+      )
+    ),
+    grid = function(x, y, len = NULL, search = "random") {
+      ## Define ranges for the parameters and
+      ## generate random values for them
+      
+      paramGrid <-
+        data.frame(
+          base = runif(len, min = .75, max = .98),
+          power = runif(len, min = 3.0, max = 8.0),
+          ntree = sample(100:400, size = len, replace = TRUE),
+          sigdf = runif(len, min = 2.0, max = 5.0))
+      return(paramGrid)
+    },
+    fit = function(x,
+                   y,
+                   wts,
+                   param,
+                   lev = NULL,
+                   last,
+                   weights,
+                   classProbs) {
+      print(param)
+      #browser()
+      
+      e <- bart(x.train = Xobs,
+                y.train = Yobs,
+                keeptrees = TRUE,
+                ntree = param$ntree,
+                base = param$base,
+                power = param$power,
+                sigdf = param$sigdf)
+      
+      e
+      
+    },
+    predict = function(modelFit,
+                       newdata,
+                       preProc = NULL,
+                       submodels = NULL) {
+      #browser()
+      predict(modelFit, newdata)
+    },
+    prob = NULL
+  )
+  
+  fitControl <- trainControl(
+    method = "adaptive_cv",
+    ## 8-fold CV
+    number = cv_fold,
+    ## repeated 5 times
+    repeats = 4,
+    adaptive = list(
+      min = 3,
+      alpha = 0.01,
+      method = "gls",
+      complete = FALSE
+    )
+  )
+  
+  tuned_bart <- train(
+    y = Yobs, 
+    x = Xobs, 
+    method = bartFit,
+    metric = "RMSE",
+    tuneLength = tune_length,
+    trControl = fitControl
+  )
+  
+  # Save Tuning parameters ---------------------------------------------------
+  dir.create("replicationCode/tuningParam/", showWarnings = FALSE)
+  #saveRDS(
+  #  object = list(tuned_bart),
+  #  file = paste0("replicationCode/tuningParam/bart", note, ".RDS")
+  #)
+  
+  return(list("tuned_bart" = tuned_bart$finalModel))
 }
 
 
@@ -718,11 +948,7 @@ predictor_grid <- list(
   }, 
   
   "BART" = function(estimator, feat) {
-    library(dbarts)
-    bartFit = bart(x.train = estimator$Xobs,
-                   y.train = estimator$Yobs,
-                   x.test = feat)
-    return(bartFit$yhat.test.mean)
+    return(predict(estimator, feat))
   }
 )
 
