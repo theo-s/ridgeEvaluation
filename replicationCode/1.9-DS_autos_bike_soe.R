@@ -73,6 +73,8 @@ datasets_grid[["autos"]] <- list(
 
 bike <- read_csv("replicationCode/bike.csv")
 
+
+
 bike <- bike %>% 
   dplyr::select(-instant,-dteday,-casual, -registered, -weekday, -season) %>%
   mutate(
@@ -89,6 +91,8 @@ n <- nrow(bike)
 test_id <- sort(sample(n, size = round(.95*n))); length(test_id)
 train_id <- (1:n)[!(1:n) %in% test_id]; length(train_id)
 
+bike_onehot_translator <- onehot::onehot(bike)
+bike <- as.data.frame(predict(bike_onehot_translator, bike))
 bike <- as.data.frame(bike)
 colnames(bike)[ncol(bike)] <- "y"
 head(bike)

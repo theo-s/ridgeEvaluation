@@ -39,6 +39,7 @@ source("replicationCode/2-generateEstimators.R")
 source("replicationCode/2.1-generateEstimators_RRF.R")
 source("replicationCode/1.8-generateDataBrieman.R")
 source("replicationCode/1.9-DS_autos_bike_soe.R")
+source("replicationCode/1.7-generateDataVaryingN.R")
 # generate all the different jobs and save it ----------------------------------
 (ds_names <- names(datasets_grid))
 (etm_names <- names(estimator_grid))

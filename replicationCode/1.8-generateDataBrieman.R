@@ -143,6 +143,8 @@ for (i in 1:length(flds)) {
 
 
 # Abalone
+abalone_onehot_translator <- onehot::onehot(abalone)
+abalone <- as.data.frame(predict(abalone_onehot_translator, abalone))
 n <- nrow(abalone)
 
 colnames(abalone)[ncol(abalone)] <- "y"
