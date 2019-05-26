@@ -854,7 +854,8 @@ estimator_grid[["BART"]] <- function(Xobs,
                 ntree = param$ntree,
                 base = param$base,
                 power = param$power,
-                sigdf = param$sigdf)
+                sigdf = param$sigdf,
+                verbose = FALSE)
       
       e
       
