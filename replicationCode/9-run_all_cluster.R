@@ -144,7 +144,7 @@ batch_func <- function(i, force = FALSE){
 
 Q(fun = batch_func,
   n_jobs = nrow(all_jobs),
-  i = 1:nrow(all_jobs),
+  i = sample(1:nrow(all_jobs)),
   export = list(
     datasets_grid = datasets_grid,
     estimator_grid = estimator_grid,
