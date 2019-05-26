@@ -2,10 +2,10 @@
 
 # RidgeRF BT tuned -------------------------------------------------------------
 estimator_grid[["caretRidgeRF_BT"]] <- function(Xobs,
-                                             Yobs,
-                                             tune_length = 200,
-                                             cv_fold = 8,
-                                             note = NA) {
+                                                Yobs,
+                                                tune_length = 200,
+                                                cv_fold = 8,
+                                                note = NA) {
   library(forestry)
   library(caret)
   
@@ -96,7 +96,7 @@ estimator_grid[["caretRidgeRF_BT"]] <- function(Xobs,
     ## repeated 5 times
     repeats = 4,
     adaptive = list(
-      min = 5,
+      min = 3,
       alpha = 0.01,
       method = "BT",
       complete = FALSE
@@ -131,10 +131,10 @@ predictor_grid[["caretRidgeRF_BT"]] <-
 
 # RidgeRF no minSplitGain ------------------------------------------------------
 estimator_grid[["caretRidgeRF_noMinSplitGain"]] <- function(Xobs,
-                                                Yobs,
-                                                tune_length = 200,
-                                                cv_fold = 8,
-                                                note = NA) {
+                                                            Yobs,
+                                                            tune_length = 200,
+                                                            cv_fold = 8,
+                                                            note = NA) {
   library(forestry)
   library(caret)
   
@@ -224,7 +224,7 @@ estimator_grid[["caretRidgeRF_noMinSplitGain"]] <- function(Xobs,
     ## repeated 5 times
     repeats = 4,
     adaptive = list(
-      min = 5,
+      min = 3,
       alpha = 0.01,
       method = "gls",
       complete = FALSE
@@ -259,10 +259,10 @@ predictor_grid[["caretRidgeRF_noMinSplitGain"]] <-
 
 # Tune Ridge Tree more min splitGain -------------------------------------------
 estimator_grid[["caretRidgeTree_moreSplit"]] <- function(Xobs,
-                                               Yobs,
-                                               tune_length = 400,
-                                               cv_fold = 8,
-                                               note = NA) {
+                                                         Yobs,
+                                                         tune_length = 400,
+                                                         cv_fold = 8,
+                                                         note = NA) {
   library(forestry)
   library(caret)
   
@@ -352,7 +352,7 @@ estimator_grid[["caretRidgeTree_moreSplit"]] <- function(Xobs,
     ## repeated 5 times
     repeats = 4,
     adaptive = list(
-      min = 5,
+      min = 3,
       alpha = 0.01,
       method = "gls",
       complete = FALSE
