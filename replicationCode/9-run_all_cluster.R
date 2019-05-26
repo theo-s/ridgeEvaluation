@@ -23,8 +23,12 @@ library(Cubist)
 library(caret)
 library(clustermq)
 # set up cluster to run on the high partition
+
+# options(clustermq.scheduler = "slurm", 
+#         clustermq.template = "~/clustermq_low.tmpl") 
+
 options(clustermq.scheduler = "slurm", 
-        clustermq.template = "~/clustermq_low.tmpl") 
+        clustermq.template = "~/clustermq_high.tmpl") 
 #~/clustermq_low.tmpl ~/clustermq_high.tmpl
 
 dir.create("replicationCode/9-results/", showWarnings = FALSE)
@@ -135,6 +139,8 @@ batch_func <- function(i, force = FALSE){
 # for (i in which(all_jobs$Estimator ==  "BART")) {
 #   batch_func(i = i, force = TRUE)
 # }
+# all_jobs[256, ]
+# batch_func(i = 256, force = TRUE)
 
 Q(fun = batch_func,
   n_jobs = nrow(all_jobs),

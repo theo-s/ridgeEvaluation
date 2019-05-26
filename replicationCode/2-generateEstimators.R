@@ -798,7 +798,7 @@ estimator_grid[["local_RF"]] <- function(Xobs,
 # Tuning BART ----------------------------------------------------------------
 estimator_grid[["BART"]] <- function(Xobs,
                                      Yobs,
-                                     tune_length = 200,
+                                     tune_length = 50,
                                      cv_fold = 8,
                                      note = NA) {
   
@@ -864,8 +864,7 @@ estimator_grid[["BART"]] <- function(Xobs,
                        newdata,
                        preProc = NULL,
                        submodels = NULL) {
-      #browser()
-      predict(modelFit, newdata)
+      apply(predict(modelFit, newdata), 2, mean)
     },
     prob = NULL
   )
@@ -949,7 +948,8 @@ predictor_grid <- list(
   }, 
   
   "BART" = function(estimator, feat) {
-    return(predict(estimator, feat))
+    s <- predict(estimator, feat)
+    return(apply(s$tuned_bart, 2, mean))
   }
 )
 

@@ -257,6 +257,8 @@ predictor_grid[["caretRidgeRF_noMinSplitGain"]] <-
     return(predict(estimator, feat)$random_rf)
   }
 
+if (FALSE) {
+  
 # Tune Ridge Tree more min splitGain -------------------------------------------
 estimator_grid[["caretRidgeTree_moreSplit"]] <- function(Xobs,
                                                          Yobs,
@@ -384,9 +386,8 @@ predictor_grid[["caretRidgeTree_moreSplit"]] <-
     return(predict(estimator, feat)$random_rf)
   }
 
+}
 
-
-if (FALSE) {
 # RidgeRF nonstrict leaf size tuned --------------------------------------------
 estimator_grid[["caretRidgeRF_nonstrict"]] <- function(Xobs,
                                                 Yobs,
@@ -515,4 +516,4 @@ predictor_grid[["caretRidgeRF_nonstrict"]] <-
   function(estimator, feat) {
     return(predict(estimator, feat)$random_rf)
   }
-}
+
