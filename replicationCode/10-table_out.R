@@ -11,6 +11,21 @@ if (dir.exists("~/Dropbox/ridgeEvaluation/")) {
 }
 library(tidyverse)
 library(xtable)
+library(ztable)
+library(magrittr)
+library(RColorBrewer)
+
+options(ztable.type="latex")
+
+z <- ztable(-data.matrix(q))
+
+z %>% makeHeatmap() %>% print(caption="Table 4. Heatmap Table")
+
+print(z)
+
+print(makeHeatmap(z, palette = "Greens",cols=c(2,3,4,5,6,7,8,9),margin=1, reverse = TRUE) %>%
+  print(caption="Table 3. Performance on Real Datasets"))
+
 
 # Output information about the data sets ---------------------------------------
 source("replicationCode/1.8-generateDataBrieman.R")
@@ -139,6 +154,9 @@ X_toprint_char
 X_toprint_char <- rbind(c("", "forestry", "ranger", "glmnet", "dbarts", "Cubist", "forestry", "grf", "forestry"), 
       X_toprint_char)
 colnames(X_toprint_char) <- c("", "RF", "RF", "RLM", "BART", "Cubist", "RCART", "local RF", "Ridge RF")
+
+
+
 
 for (i in 2:nrow(X_toprint_char)) {
   # i <- 2
