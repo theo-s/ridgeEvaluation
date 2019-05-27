@@ -96,6 +96,7 @@ bike <- as.data.frame(predict(bike_onehot_translator, bike))
 bike <- as.data.frame(bike)
 colnames(bike)[ncol(bike)] <- "y"
 head(bike)
+colnames(bike) <- gsub("=", "", colnames(bike))
 datasets_grid[["bike"]] <- list(
   "train" = bike[train_id, ],
   "test" = bike[test_id, ])
