@@ -142,6 +142,10 @@ batch_func <- function(i, force = FALSE){
 # all_jobs[256, ]
 # batch_func(i = 256, force = TRUE)
 
+which(all_jobs$Dataset == "simulated-StepLinear-Function-2048" & 
+        all_jobs$Estimator == "local_RF")
+batch_func(i = 252, force = TRUE)
+stop("DONE!")
 Q(fun = batch_func,
   n_jobs = nrow(all_jobs),
   i = sample(which(all_jobs$Estimator %in% c("forestryRF", "caretRidgeTree", "cubist"))),
