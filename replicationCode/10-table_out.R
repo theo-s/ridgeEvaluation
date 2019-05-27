@@ -14,18 +14,9 @@ library(xtable)
 library(ztable)
 library(magrittr)
 library(RColorBrewer)
+library(superheat)
 
 options(ztable.type="latex")
-
-z <- ztable(-data.matrix(q))
-
-z %>% makeHeatmap() %>% print(caption="Table 4. Heatmap Table")
-
-print(z)
-
-print(makeHeatmap(z, palette = "Greens",cols=c(2,3,4,5,6,7,8,9),margin=1, reverse = TRUE) %>%
-  print(caption="Table 3. Performance on Real Datasets"))
-
 
 # Output information about the data sets ---------------------------------------
 source("replicationCode/1.8-generateDataBrieman.R")
@@ -153,10 +144,67 @@ X_toprint_char$Dataset[4] <- "Boston"
 X_toprint_char
 X_toprint_char <- rbind(c("", "forestry", "ranger", "glmnet", "dbarts", "Cubist", "forestry", "grf", "forestry"), 
       X_toprint_char)
-colnames(X_toprint_char) <- c("", "RF", "RF", "RLM", "BART", "Cubist", "RCART", "local RF", "Ridge RF")
+colnames(X_toprint_char) <- c("", "RF \n (forestry)", 
+                              "RF \n (ranger)", 
+                              "RLM \n (glmnet)",
+                              "BART \n (dbarts)",
+                              "Cubist \n (Cubist)",
+                              "RCART \n (forestry)",
+                              "local RF \n (grf)",
+                              "Ridge RF \n (forestry)")
+
+
+# SuperHeat Table ==============================================================
+z <- X_toprint_char[-c(3,4,6,7,16,17,18,19,20,21,22,23,24,25),]
+
+names <- z[,1]
+z <- z[,-1]
+row.names(z) <- names
+
+names <- z[1,]
+z <- z[-1,]
+#colnames(z) <- names
+
+mat <- data.matrix(z)
+
+
+rows <- row.names(z)
+
+a <- data.matrix(t(scale(t(mat))))
+
+attr(a,"scaled:center")<-NULL
+attr(a,"scaled:scale")<-NULL
+mat[is.na(mat)] <- 0.0
+
+
+superheat(data.matrix(a),
+          X.text = round(as.matrix(mat), 2),
+          X.text.size = 3.5,
+          heat.na.col = "white",
+          title = "Performance on Real Datasets",
+          legend = FALSE,
+          order.rows = nrow(mat):1,
+          heat.pal = c("green", "yellow", "red"),
+          bottom.label.text.angle = 90,
+          grid.hline = FALSE,
+          grid.vline = FALSE,
+          left.label.text.size = 3,
+          bottom.label.text.size = 3)
 
 
 
+
+
+
+
+z <- ztable(-data.matrix(q))
+
+z %>% makeHeatmap() %>% print(caption="Table 4. Heatmap Table")
+
+print(z)
+
+print(makeHeatmap(z, palette = "Greens",cols=c(2,3,4,5,6,7,8,9),margin=1, reverse = TRUE) %>%
+        print(caption="Table 3. Performance on Real Datasets"))
 
 for (i in 2:nrow(X_toprint_char)) {
   # i <- 2
