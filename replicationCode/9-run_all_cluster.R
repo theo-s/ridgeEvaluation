@@ -136,9 +136,10 @@ batch_func <- function(i, force = FALSE){
 # 
 # readRDS("replicationCode/tuningParam/RidgeForestOzone_fold5.RDS")
 # batch_func(i = 22, force = TRUE)
-# for (i in which(all_jobs$Estimator ==  "BART")) {
-#   batch_func(i = i, force = TRUE)
-# }
+for (i in sample(which(all_jobs$Estimator ==  "BART"))) {
+   batch_func(i = i, force = TRUE)
+}
+stop("done")
 # all_jobs[256, ]
 # batch_func(i = 256, force = TRUE)
 
