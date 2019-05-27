@@ -142,9 +142,10 @@ batch_func <- function(i, force = FALSE){
 # all_jobs[256, ]
 # batch_func(i = 256, force = TRUE)
 
+all_jobs <- all_jobs[all_jobs$Estimator == "glmnet", ]
 all_jobs
 batch_func(i = 27, force = FALSE)
-all_jobs <- all_jobs[all_jobs$Estimator == "glmnet", ]
+
 
 Q(fun = batch_func,
   n_jobs = nrow(all_jobs),
