@@ -142,6 +142,8 @@ batch_func <- function(i, force = FALSE){
 #stop("done")
 # all_jobs[256, ]
 # batch_func(i = 256, force = TRUE)
+which(all_jobs$Estimator == "caretRidgeRF")
+all_jobs[all_jobs$Estimator == "caretRidgeRF", ]
 
 
 print("running things in parallel")
@@ -155,9 +157,8 @@ foreach(i = which(all_jobs$Estimator ==  "BART")) %dopar% {
 }
 stop("done")
 
-for (i in which(all_jobs$Estimator ==  "BART")) {
-  print(paste("running", i))
-  batch_func(i = i, force = FALSE)
+for (i in which(all_jobs$Estimator == "caretRidgeRF")) {
+   batch_func(i = i, force = FALSE)
 }
 stop("done")
 
