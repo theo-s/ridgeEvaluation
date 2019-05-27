@@ -143,6 +143,11 @@ batch_func <- function(i, force = FALSE){
 # all_jobs[256, ]
 # batch_func(i = 256, force = TRUE)
 
+for (i in c(68:72, 63:67)) {
+   batch_func(i = i, force = FALSE)
+}
+stop("done")
+
 which(all_jobs$Dataset == "simulated-StepLinear-Function-2048" & 
         all_jobs$Estimator == "local_RF")
 # batch_func(i = 252, force = TRUE)
