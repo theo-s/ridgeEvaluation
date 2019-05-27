@@ -23,8 +23,12 @@ library(Cubist)
 library(caret)
 library(clustermq)
 # set up cluster to run on the high partition
+
+# options(clustermq.scheduler = "slurm", 
+#         clustermq.template = "~/clustermq_low.tmpl") 
+
 options(clustermq.scheduler = "slurm", 
-        clustermq.template = "~/clustermq_low.tmpl") 
+        clustermq.template = "~/clustermq_high.tmpl") 
 #~/clustermq_low.tmpl ~/clustermq_high.tmpl
 
 dir.create("replicationCode/9-results/", showWarnings = FALSE)
@@ -132,14 +136,20 @@ batch_func <- function(i, force = FALSE){
 # 
 # readRDS("replicationCode/tuningParam/RidgeForestOzone_fold5.RDS")
 # batch_func(i = 22, force = TRUE)
-# for (i in which(all_jobs$Estimator ==  "BART")) {
-#   batch_func(i = i, force = TRUE)
-# }
-<<<<<<< HEAD
+for (i in sample(which(all_jobs$Estimator ==  "BART"))) {
+   batch_func(i = i, force = TRUE)
+}
+stop("done")
+# all_jobs[256, ]
+# batch_func(i = 256, force = TRUE)
 
+which(all_jobs$Dataset == "simulated-StepLinear-Function-2048" & 
+        all_jobs$Estimator == "local_RF")
+batch_func(i = 252, force = TRUE)
+stop("DONE!")
 Q(fun = batch_func,
   n_jobs = nrow(all_jobs),
-  i = 1:nrow(all_jobs),
+  i = sample(which(all_jobs$Estimator %in% c("forestryRF", "caretRidgeTree", "cubist"))),
   export = list(
     datasets_grid = datasets_grid,
     estimator_grid = estimator_grid,

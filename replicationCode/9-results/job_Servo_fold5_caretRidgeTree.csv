@@ -1,2 +1,2 @@
 "Dataset","Estimator","EMSE","runtime"
-"Servo_fold5","caretRidgeTree",0.77452817901367,302.590564336
+"Servo_fold5","caretRidgeTree",0.737915892616594,198.013968143

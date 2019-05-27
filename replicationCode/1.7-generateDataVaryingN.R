@@ -54,9 +54,9 @@ reg <- forestry(x = x[sample_idx,],
                 nodesizeAvg = 1,
                 nodesizeStrictAvg = 1)
 
-simulated_y <- predict(reg, x)
+y <- predict(reg, x)
 
-simulated_step <- cbind(x, simulated_y)
+simulated_step <- as.data.frame(cbind(x, y))
 
 for (nobs in 128 * 2 ^ (0:4)) {
   
@@ -85,9 +85,9 @@ simulated_y_step <- predict(reg, x)
 # simulated linear y ----------------
 simulated_y_linear <- x %*% b + rnorm(n, sd = 2)
 
-y_sim <- ifelse(x[,1] < .5, simulated_y_linear, simulated_y_step)
+y <- ifelse(x[,1] < .5, simulated_y_linear, simulated_y_step)
 
-simulated_StepLinear <- cbind(x, y_sim)
+simulated_StepLinear <- as.data.frame(cbind(x, y))
 
 for (nobs in 128 * 2 ^ (0:4)) {
   
