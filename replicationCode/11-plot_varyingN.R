@@ -30,19 +30,23 @@ X %>% filter(!is.na(value)) %>%
   theme(legend.position = "none")
 
 for (expnm in unique(X$dsname)) {
-  X %>% filter(!is.na(value) & dsname == expnm) %>%
+  X %>% filter(!is.na(value) & dsname == expnm & variable != "cubist" & variable != "caretRidgeTree") %>%
     ggplot(aes(x = n, y = value, color = variable))  +
     geom_line() +
     geom_text(aes(label = variable)) +
     theme_bw() + 
     # ylim(0, 10) +
     theme(legend.position = "none") +
-    ggtitle(label = expnm) +
+    # ggtitle(label = expnm) +
+    ggtitle(label = "") +
     xlab("Sample Size") +
     ylab("EMSE") + 
     geom_point()
   
-  ggsave(file = paste0("figures/varyn_", expnm, ".pdf"), height = 5, width = 8)
+  ggsave(file = paste0("figures/varyn_", expnm, ".pdf"), height = 3.3, width = 6)
+  ggsave(file = paste0("~/Dropbox/RidgeForestry_paper/figures/2-VaryNSim/varyn_", 
+                       expnm, ".pdf"), height = 3.3, width = 6)
+  
 }
 
 
