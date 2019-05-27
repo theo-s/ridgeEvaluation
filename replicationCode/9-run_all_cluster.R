@@ -143,8 +143,21 @@ batch_func <- function(i, force = FALSE){
 # all_jobs[256, ]
 # batch_func(i = 256, force = TRUE)
 
-for (i in c(68:72, 63:67)) {
-   batch_func(i = i, force = FALSE)
+
+print("running things in parallel")
+library(foreach)
+library(doParallel)
+cl <- makeCluster(8)
+registerDoParallel(cl)
+foreach(i = which(all_jobs$Estimator ==  "BART")) %dopar% {
+  batch_func(i = i, force = FALSE)
+  i
+}
+stop("done")
+
+for (i in which(all_jobs$Estimator ==  "BART")) {
+  print(paste("running", i))
+  batch_func(i = i, force = FALSE)
 }
 stop("done")
 
