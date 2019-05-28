@@ -576,7 +576,7 @@ estimator_grid[["glmnet"]] <- function(Xobs,
 # Tuning cubist ----------------------------------------------------------------
 estimator_grid[["cubist"]] <- function(Xobs,
                                        Yobs,
-                                       tune_length = 200,
+                                       tune_length = 50,
                                        cv_fold = 8,
                                        note = NA) {
   library(Cubist)
@@ -594,14 +594,12 @@ estimator_grid[["cubist"]] <- function(Xobs,
       parameter = c(
         "committees",
         "extrapolation",
-        "sample",
         "neighbors"
       ),
       class = rep("numeric", 4),
       label = c(
         "committees",
         "extrapolation",
-        "sample",
         "neighbors"
       )
     ),
@@ -613,7 +611,6 @@ estimator_grid[["cubist"]] <- function(Xobs,
         data.frame(
           committees = sample(1:100, size = len, replace = TRUE),
           extrapolation = sample(90:100, size = len, replace = TRUE),
-          sample = runif(len, 0.5, 1),
           neighbors = sample(0:9, size = len, replace = TRUE))
       return(paramGrid)
     },
@@ -628,16 +625,17 @@ estimator_grid[["cubist"]] <- function(Xobs,
       print(param)
       
       c <- cubist(x = Xobs,
-                  y = Yobs, 
+                  y = Yobs,
                   committees = param$committees,
-                  control = cubistControl(extrapolation = param$extrapolation,
-                                          sample = param$sample))
+                  control = cubistControl(extrapolation = param$extrapolation))
       c$tuneValues$neighbors <- param$neighbors
+      c
     },
     predict = function(modelFit,
                        newdata,
                        preProc = NULL,
                        submodels = NULL) {
+      #browser()
       predict(modelFit, newdata, neighbors = modelFit$tuneValues$neighbors)
     },
     prob = NULL
