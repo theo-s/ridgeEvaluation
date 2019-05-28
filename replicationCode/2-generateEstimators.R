@@ -595,14 +595,14 @@ estimator_grid[["cubist"]] <- function(Xobs,
         "committees",
         "extrapolation",
         "sample",
-        "neightbors"
+        "neighbors"
       ),
       class = rep("numeric", 4),
       label = c(
         "committees",
         "extrapolation",
         "sample",
-        "neightbors"
+        "neighbors"
       )
     ),
     grid = function(x, y, len = NULL, search = "random") {
