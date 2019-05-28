@@ -190,6 +190,7 @@ Q(fun = batch_func,
   ))
 
 update_tables()
+read.csv("replicationCode/9-run_all_cluster_resultsEMSE.csv")
 tt <- read.csv("replicationCode/9-run_all_cluster_resultsEMSE.csv")[,c(2,9, 4,11:13)]
 tt[,-1] <- tt[,-1] / tt$local_RF
 tt
