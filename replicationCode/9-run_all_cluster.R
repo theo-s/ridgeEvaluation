@@ -130,23 +130,30 @@ batch_func <- function(i, force = FALSE){
 #   batch_func(i = i, force = FALSE)
 # }
 # 
-# print("running things in parallel")
-# library(foreach)
-# library(doParallel)
-# cl <- makeCluster(8)
-# registerDoParallel(cl)
-# foreach(i = which(all_jobs$Estimator ==  "BART")) %dopar% {
-#   batch_func(i = i, force = FALSE)
-#   i
+print("running things in parallel")
+library(foreach)
+library(doParallel)
+cl <- makeCluster(8)
+registerDoParallel(cl)
+foreach(i = c(130:133, 135:137, 140:142, 166:180)) %dopar% {
+  source("replicationCode/2-generateEstimators.R")
+  batch_func(i = i, force = TRUE)
+  i
+}
+all_jobs[c(130:132, 135:137, 140:142, 166:180), ]
+
+stop("done")
+all_jobs
+# which(all_jobs$Dataset == "Friedman_1" & 
+#         all_jobs$Estimator == "caretRidgeRF")
+# 
+# for (i in c(166:180, 130:144)) {
+#   print(paste("##################### DONE WITH", i, "###################"))
+#   batch_func(i = i, force = TRUE)
 # }
 # stop("done")
-
-which(all_jobs$Dataset == "Friedman_1" & 
-        all_jobs$Estimator == "caretRidgeRF")
-
-batch_func(i = 37, force = TRUE)
-
-stop("DONE!")
+# 
+# stop("DONE!")
 Q(fun = batch_func,
   n_jobs = nrow(all_jobs),
   i = sample(1:nrow(all_jobs)),
