@@ -169,6 +169,7 @@ mat <- data.matrix(z)
 
 
 rows <- row.names(z)
+#mat[,5] = NA
 
 a <- data.matrix(t(scale(t(mat))))
 

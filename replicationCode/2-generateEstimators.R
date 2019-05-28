@@ -576,7 +576,7 @@ estimator_grid[["glmnet"]] <- function(Xobs,
 # Tuning cubist ----------------------------------------------------------------
 estimator_grid[["cubist"]] <- function(Xobs,
                                        Yobs,
-                                       tune_length = 50,
+                                       tune_length = 200,
                                        cv_fold = 8,
                                        note = NA) {
   library(Cubist)
@@ -596,7 +596,7 @@ estimator_grid[["cubist"]] <- function(Xobs,
         "extrapolation",
         "neighbors"
       ),
-      class = rep("numeric", 4),
+      class = rep("numeric", 3),
       label = c(
         "committees",
         "extrapolation",
