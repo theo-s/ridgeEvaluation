@@ -26,7 +26,7 @@ estimator_grid <- list()
 #Tuning forestry RF ------------------------------------------------------------
 estimator_grid[["forestryRF"]] <- function(Xobs,
                                            Yobs,
-                                           tune_length = 200,
+                                           tune_length = 20,
                                            cv_fold = 8,
                                            note = NA) {
   library(forestry)
@@ -202,7 +202,7 @@ estimator_grid[["caretRidgeRF"]] <- function(Xobs,
         nodesizeSpl = 1,
         nodesizeAvg = 1,
         nodesizeStrictAvg = 1,
-        nthread = 20,
+        nthread = 1,
         nodesizeStrictSpl = param$nodesizeStrictSpl,
         mtry = param$mtry,
         overfitPenalty = param$overfitPenalty,

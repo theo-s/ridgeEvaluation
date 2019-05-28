@@ -142,33 +142,35 @@ batch_func <- function(i, force = FALSE){
 #stop("done")
 # all_jobs[256, ]
 # batch_func(i = 256, force = TRUE)
-which(all_jobs$Estimator == "caretRidgeRF")
-all_jobs[all_jobs$Estimator == "caretRidgeRF", ]
-
-
-print("running things in parallel")
-library(foreach)
-library(doParallel)
-cl <- makeCluster(8)
-registerDoParallel(cl)
-foreach(i = which(all_jobs$Estimator ==  "BART")) %dopar% {
-  batch_func(i = i, force = FALSE)
-  i
-}
-stop("done")
-
-for (i in which(all_jobs$Estimator == "caretRidgeRF")) {
-   batch_func(i = i, force = FALSE)
-}
-stop("done")
-
-which(all_jobs$Dataset == "simulated-StepLinear-Function-2048" & 
-        all_jobs$Estimator == "local_RF")
+# which(all_jobs$Estimator == "caretRidgeRF")
+# all_jobs[all_jobs$Estimator == "caretRidgeRF", ]
+# batch_func(i = 37, force = FALSE)
+# 
+# 
+# print("running things in parallel")
+# library(foreach)
+# library(doParallel)
+# parallel::detectCores(all.tests = FALSE, logical = TRUE)
+# cl <- makeCluster(8)
+# registerDoParallel(cl)
+# foreach(i = which(all_jobs$Estimator ==  "caretRidgeRF")) %dopar% {
+#   batch_func(i = i, force = FALSE)
+#   i
+# }
+# stop("done")
+# 
+# for (i in which(all_jobs$Estimator == "caretRidgeRF")) {
+#    batch_func(i = i, force = FALSE)
+# }
+# stop("done")
+# 
+# which(all_jobs$Dataset == "simulated-StepLinear-Function-2048" & 
+#         all_jobs$Estimator == "local_RF")
 # batch_func(i = 252, force = TRUE)
 # stop("DONE!")
 Q(fun = batch_func,
   n_jobs = nrow(all_jobs),
-  i = sample(1:nrow(all_jobs)),
+  i = sample(which(all_jobs$Estimator == "caretRidgeRF")),
   export = list(
     datasets_grid = datasets_grid,
     estimator_grid = estimator_grid,
