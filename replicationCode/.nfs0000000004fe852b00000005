@@ -123,37 +123,24 @@ batch_func <- function(i, force = FALSE){
   return(filename)
 }
 
-<<<<<<< HEAD
-
-# which(all_jobs$Estimator == "caretRidgeRF")
-# all_jobs[all_jobs$Estimator == "caretRidgeRF", ]
-# for (i in which(all_jobs$Estimator == "BART")) {
-#   batch_func(i = i, force = FALSE)
-# }
+# all_jobs[(0:7) * 21 + 1, ]
+# 1 OK
+# 22 OK
+# 43 OK
+# 64 NOOOOOOO
+# 85 OK
+# 106 OK
+# 127 OK
+# 148 OK
+# batch_func(i = 64)
 # 
-print("running things in parallel")
-library(foreach)
-library(doParallel)
-cl <- makeCluster(8)
-registerDoParallel(cl)
-foreach(i = c(130:133, 135:137, 140:142, 166:180)) %dopar% {
-  source("replicationCode/2-generateEstimators.R")
-  batch_func(i = i, force = TRUE)
-  i
-}
-all_jobs[c(130:132, 135:137, 140:142, 166:180), ]
-
-stop("done")
-all_jobs
-# which(all_jobs$Dataset == "Friedman_1" & 
-#         all_jobs$Estimator == "caretRidgeRF")
-# 
-# for (i in c(166:180, 130:144)) {
-#   print(paste("##################### DONE WITH", i, "###################"))
+# readRDS("replicationCode/tuningParam/RidgeForestOzone_fold5.RDS")
+# batch_func(i = 22, force = TRUE)
+#for (i in sample(which(all_jobs$Estimator ==  "BART"))) {
 #   batch_func(i = i, force = TRUE)
-# }
-# stop("done")
-# 
+#}
+#stop("done")
+# all_jobs[256, ]
 # batch_func(i = 256, force = TRUE)
 # which(all_jobs$Estimator == "caretRidgeRF")
 # all_jobs[all_jobs$Estimator == "caretRidgeRF", ]
@@ -178,6 +165,8 @@ all_jobs
 # stop("done")
 # 
 # which(all_jobs$Dataset == "simulated-StepLinear-Function-2048" & 
+#         all_jobs$Estimator == "local_RF")
+# batch_func(i = 252, force = TRUE)
 # stop("DONE!")
 Q(fun = batch_func,
   n_jobs = nrow(all_jobs),
