@@ -169,7 +169,6 @@ batch_func <- function(i, force = FALSE){
 # }
 # stop("done")
 # 
-
 print("running things in parallel")
 library(foreach)
 library(doParallel)
@@ -187,8 +186,6 @@ stop("done")
 # which(all_jobs$Dataset == "simulated-StepLinear-Function-2048" &
 stop("DONE!")
 
-
-
 Q(fun = batch_func,
   n_jobs = nrow(all_jobs),
   i = 1:nrow(all_jobs),
@@ -202,7 +199,9 @@ Q(fun = batch_func,
   ))
 
 update_tables()
-read.csv("replicationCode/9-run_all_cluster_resultsEMSE.csv")
+tt <- read.csv("replicationCode/9-run_all_cluster_resultsEMSE.csv")[,c(2,9, 4,11:13)]
+tt[,-1] <- tt[,-1] / tt$local_RF
+tt
 read.csv("replicationCode/9-run_all_cluster_resultsRuntime.csv")
 
 
