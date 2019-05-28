@@ -122,9 +122,6 @@ batch_func <- function(i, force = FALSE){
   }
   return(filename)
 }
-
-<<<<<<< HEAD
-
 # which(all_jobs$Estimator == "caretRidgeRF")
 # all_jobs[all_jobs$Estimator == "caretRidgeRF", ]
 # for (i in which(all_jobs$Estimator == "BART")) {
@@ -136,12 +133,12 @@ library(foreach)
 library(doParallel)
 cl <- makeCluster(8)
 registerDoParallel(cl)
-foreach(i = c(130:133, 135:137, 140:142, 166:180)) %dopar% {
+foreach(i = c(130:132, 135:137, 140:142, 166:180, 238:240, 243:245, 248:250)) %dopar% {
   source("replicationCode/2-generateEstimators.R")
   batch_func(i = i, force = TRUE)
   i
 }
-all_jobs[c(130:132, 135:137, 140:142, 166:180), ]
+all_jobs[c(130:132, 135:137, 140:142, 166:180, 238:240, 243:245, 248:250), ]
 
 stop("done")
 all_jobs

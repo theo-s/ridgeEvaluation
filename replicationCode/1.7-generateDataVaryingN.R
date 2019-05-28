@@ -3,25 +3,23 @@
 library(forestry)
 library(MASS)
 
-# Artificially created data sets -----------------------------------------------
-# Dataset #1 Linear ------------------------------------------------------------
+
 set.seed(776291)
 n_train <- 2100
 n_test <- 10000
 n <- n_train + n_test
 sd <- 1
 p <- 10
-nonlinear.feats <- 5
-
-b <- rep(0, p)
-b[1] <- 3.22 
-b[2] <- -4.7 
-b[3] <- -1.98 
-b[4] <- 2.87 
-b[8] <- 0.63 
-b[10] <- 3.64
-
 x <- matrix(rnorm(p * n), nrow = n, ncol = p)
+
+# Artificially created data sets -----------------------------------------------
+# Dataset #1 Linear ------------------------------------------------------------
+b <- rep(0, p)
+b[2] <- -0.47 
+b[3] <- -0.98 
+b[4] <- 0.87 
+b[8] <- 0.63 
+b[10] <- 0.64
 
 y <- x %*% b
 x <- as.data.frame(x)
@@ -38,13 +36,7 @@ for (nobs in 128 * 2^(0:4)) {
 
 # Dataset #2 Step Function -----------------------------------------------------
 set.seed(24332333)
-n_train <- 2100
-n_test <- 10000
-n <- n_train + n_test
-p <- 10 
 num_levels <- 50
-
-x <- matrix(runif(p * n, 0, 1), nrow = n, ncol = p)
 y_levels <- runif(num_levels, -10, 10) 
 sample_idx <- sample(1:nrow(x), num_levels)
 
@@ -71,20 +63,10 @@ for (nobs in 128 * 2 ^ (0:4)) {
 
 # Dataset #3 half Step halfLinear Function -------------------------------------
 set.seed(24332333)
-n_train <- 2100
-n_test <- 10000
-n <- n_train + n_test
-p <- 10 
-num_levels <- 50
-
-x <- matrix(runif(p * n, 0, 1), nrow = n, ncol = p)
-y_levels <- runif(num_levels, -10, 10) 
-sample_idx <- sample(1:nrow(x), num_levels)
-
 # simulated y step ------------------
 simulated_y_step <- predict(reg, x)
 # simulated linear y ----------------
-simulated_y_linear <- x %*% b
+simulated_y_linear <- as.matrix(x) %*% b
 
 y <- ifelse(x[,1] < .5, simulated_y_linear, simulated_y_step)
 
@@ -100,4 +82,4 @@ for (nobs in 128 * 2 ^ (0:4)) {
   
 }
 
-str(datasets_grid)
+# str(datasets_grid)

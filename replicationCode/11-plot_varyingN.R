@@ -22,13 +22,13 @@ X$dsname[X$Dataset == "artificialLM"] <- "Experiment 1"
 X$dsname[X$Dataset == "simulatedStepFunction"] <- "Experiment 2"
 X$dsname[X$Dataset == "simulatedStepLinearFunction"] <- "Experiment 3"
 X %>% filter(!is.na(value)) %>%
-  filter(variable %in% c("ranger", "glmnet")) %>%
+  filter(variable %in% c("ranger", "glmnet", "local_RF")) %>%
   ggplot(aes(x = n, y = value, color = variable))  +
   geom_line() +
   facet_wrap(.~Dataset, scales = "free_y") +
   geom_text(aes(label = variable)) +
   theme_bw() + 
-  # ylim(0, 5) +
+  ylim(0, 15) +
   theme(legend.position = "none")
 
 for (expnm in unique(X$dsname)) {
