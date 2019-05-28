@@ -430,7 +430,8 @@ estimator_grid[["ranger"]] <- function(Xobs,
              num.trees = param$ntree,
              sample.fraction = param$sample.fraction,
              min.node.size = param$nodesizeStrictSpl,
-             mtry = param$mtry
+             mtry = param$mtry, 
+             num.threads = 1
       )
     },
     predict = function(modelFit,

@@ -11,6 +11,7 @@ if (dir.exists("~/Dropbox/ridgeEvaluation/")) {
 }
 library(tidyverse)
 library(xtable)
+library(reshape)
 X <- read.csv("replicationCode/9-run_all_cluster_resultsEMSE.csv", stringsAsFactors = FALSE)
 X <- X[22:36,-1]
 X$n <- as.numeric(gsub(pattern = "([^0123456789])", replacement = "", X$Dataset))
@@ -21,12 +22,13 @@ X$dsname[X$Dataset == "artificialLM"] <- "Experiment 1"
 X$dsname[X$Dataset == "simulatedStepFunction"] <- "Experiment 2"
 X$dsname[X$Dataset == "simulatedStepLinearFunction"] <- "Experiment 3"
 X %>% filter(!is.na(value)) %>%
+  filter(variable %in% c("ranger", "glmnet", "local_RF")) %>%
   ggplot(aes(x = n, y = value, color = variable))  +
   geom_line() +
   facet_wrap(.~Dataset, scales = "free_y") +
   geom_text(aes(label = variable)) +
   theme_bw() + 
-  ylim(0, 10) +
+  ylim(0, 15) +
   theme(legend.position = "none")
 
 for (expnm in unique(X$dsname)) {
