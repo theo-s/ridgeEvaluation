@@ -26,11 +26,14 @@ x <- as.data.frame(x)
 lm_artificial_ds <- cbind(x, y)
 
 for (nobs in 128 * 2^(0:4)) {
+  set.seed(776291)
+  
   data_name <- paste0("artificial-LM-", nobs)
   
   datasets_grid[[data_name]] <- list(
-    "test" = lm_artificial_ds[1:n_test, ] %>% mutate(y = y +  sd * rnorm(n_test)),
-    "train" = lm_artificial_ds[(n_test + 1):(n_test + nobs), ])
+    "test" = lm_artificial_ds[1:n_test,],
+    "train" = lm_artificial_ds[(n_test + 1):(n_test + nobs),] %>%
+      mutate(y = y +  3 * sd * rnorm(nobs)))
   
 }
 
@@ -52,12 +55,15 @@ y <- predict(reg, x)
 simulated_step <- as.data.frame(cbind(x, y))
 
 for (nobs in 128 * 2 ^ (0:4)) {
+  set.seed(776291)
+  
   
   data_name <- paste0("simulated-Step-Function-", nobs)
   
   datasets_grid[[data_name]] <- list(
-    "test" = simulated_step[1:n_test, ] %>% mutate(y = y +  sd * rnorm(n_test)),
-    "train" = simulated_step[(n_test + 1):(n_test + nobs), ])
+    "test" = simulated_step[1:n_test,],
+    "train" = simulated_step[(n_test + 1):(n_test + nobs),] %>%
+      mutate(y = y +  sd * rnorm(nobs)))
   
 }
 
@@ -73,12 +79,15 @@ y <- ifelse(x[,1] < .5, simulated_y_linear, simulated_y_step)
 simulated_StepLinear <- as.data.frame(cbind(x, y))
 
 for (nobs in 128 * 2 ^ (0:4)) {
+  set.seed(776291)
+  
   
   data_name <- paste0("simulated-StepLinear-Function-", nobs)
   
   datasets_grid[[data_name]] <- list(
-    "test" = simulated_StepLinear[1:n_test, ] %>% mutate(y = y +  sd * rnorm(n_test)), 
-    "train" = simulated_StepLinear[(n_test + 1):(n_test + nobs), ])
+    "test" = simulated_StepLinear[1:n_test,],
+    "train" = simulated_StepLinear[(n_test + 1):(n_test + nobs),] %>%
+      mutate(y = y +  sd * rnorm(nobs)))
   
 }
 

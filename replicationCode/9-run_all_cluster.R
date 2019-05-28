@@ -169,13 +169,22 @@ batch_func <- function(i, force = FALSE){
 # }
 # stop("done")
 # 
-# for (i in which(all_jobs$Estimator == "caretRidgeRF")) {
-#    batch_func(i = i, force = FALSE)
-# }
-# stop("done")
-# 
-# which(all_jobs$Dataset == "simulated-StepLinear-Function-2048" & 
-# stop("DONE!")
+print("running things in parallel")
+library(foreach)
+library(doParallel)
+parallel::detectCores(all.tests = FALSE, logical = TRUE)
+cl <- makePSOCKcluster(8)
+registerDoParallel(cl)
+for (i in which(all_jobs$Estimator %in% c("caretRidgeRF") &  #which(all_jobs$Estimator %in% c("glmnet", "ranger") &
+                (grepl("artificial", all_jobs$Dataset) | grepl("simulated", all_jobs$Dataset)) &
+                !grepl("2048", all_jobs$Dataset)
+                )) {
+   batch_func(i = i, force = TRUE)
+}
+stop("done")
+
+# which(all_jobs$Dataset == "simulated-StepLinear-Function-2048" &
+stop("DONE!")
 
 Q(fun = batch_func,
   n_jobs = nrow(all_jobs),
