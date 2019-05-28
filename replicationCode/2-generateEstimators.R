@@ -594,13 +594,13 @@ estimator_grid[["cubist"]] <- function(Xobs,
       parameter = c(
         "committees",
         "extrapolation",
-        "sample"
+        "neighbors"
       ),
       class = rep("numeric", 3),
       label = c(
         "committees",
         "extrapolation",
-        "sample"
+        "neighbors"
       )
     ),
     grid = function(x, y, len = NULL, search = "random") {
@@ -610,8 +610,8 @@ estimator_grid[["cubist"]] <- function(Xobs,
       paramGrid <-
         data.frame(
           committees = sample(1:100, size = len, replace = TRUE),
-          extrapolation = sample(1:100, size = len, replace = TRUE),
-          sample = runif(len, 0.5, 1))
+          extrapolation = sample(90:100, size = len, replace = TRUE),
+          neighbors = sample(0:9, size = len, replace = TRUE))
       return(paramGrid)
     },
     fit = function(x,
@@ -624,18 +624,19 @@ estimator_grid[["cubist"]] <- function(Xobs,
                    classProbs) {
       print(param)
       
-      cubist(x = Xobs,
-             y = Yobs, 
-             committees = param$committees,
-             control = cubistControl(extrapolation = param$extrapolation,
-                                     sample = param$sample))
-      
+      c <- cubist(x = Xobs,
+                  y = Yobs,
+                  committees = param$committees,
+                  control = cubistControl(extrapolation = param$extrapolation))
+      c$tuneValues$neighbors <- param$neighbors
+      c
     },
     predict = function(modelFit,
                        newdata,
                        preProc = NULL,
                        submodels = NULL) {
-      predict(modelFit, newdata)
+      #browser()
+      predict(modelFit, newdata, neighbors = modelFit$tuneValues$neighbors)
     },
     prob = NULL
   )

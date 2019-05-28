@@ -141,7 +141,6 @@ batch_func <- function(i, force = FALSE){
 #}
 #stop("done")
 # all_jobs[256, ]
-<<<<<<< HEAD
 # batch_func(i = 256, force = TRUE)
 # which(all_jobs$Estimator == "caretRidgeRF")
 # all_jobs[all_jobs$Estimator == "caretRidgeRF", ]
@@ -166,6 +165,8 @@ batch_func <- function(i, force = FALSE){
 # stop("done")
 # 
 # which(all_jobs$Dataset == "simulated-StepLinear-Function-2048" & 
+#         all_jobs$Estimator == "local_RF")
+# batch_func(i = 252, force = TRUE)
 # stop("DONE!")
 Q(fun = batch_func,
   n_jobs = nrow(all_jobs),
