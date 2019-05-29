@@ -171,14 +171,13 @@ batch_func <- function(i, force = FALSE){
 # 
 # print("running things in parallel")
 # library(foreach)
-# library(doParallel)
-# parallel::detectCores(all.tests = FALSE, logical = TRUE)
-# cl <- makePSOCKcluster(8)
-# registerDoParallel(cl)
+library(doParallel)
+parallel::detectCores(all.tests = FALSE, logical = TRUE)
+cl <- makePSOCKcluster(6)
+registerDoParallel(cl)
+
 for (i in which(all_jobs$Estimator %in% c("BART") &  #which(all_jobs$Estimator %in% c("glmnet", "ranger") &
-                (grepl("artificial", all_jobs$Dataset) | grepl("simulated", all_jobs$Dataset)) &
-                !grepl("2048", all_jobs$Dataset)
-                )) {
+                (grepl("artificial", all_jobs$Dataset) | grepl("simulated", all_jobs$Dataset)))) {
    batch_func(i = i, force = TRUE)
 }
 stop("done")
@@ -221,7 +220,7 @@ X %>%
             BART = mean(BART),
             caretRidgeRF_BT = mean(caretRidgeRF_BT),
             caretRidgeRF_noMinSplitGain = mean(caretRidgeRF_noMinSplitGain),
-            caretRidgeTree_moreSplit = mean(caretRidgeTree_moreSplit))%>%
+            caretRidgeTree_moreSplit = mean(caretRidgeTree_moreSplit)) %>% 
   dplyr::rename(RF_forestry = forestryRF,
                 Ridge_RF = caretRidgeRF,
                 Ridge_Tree = caretRidgeTree,
