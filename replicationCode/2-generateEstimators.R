@@ -800,7 +800,7 @@ estimator_grid[["local_RF"]] <- function(Xobs,
 # Tuning BART ----------------------------------------------------------------
 estimator_grid[["BART"]] <- function(Xobs,
                                      Yobs,
-                                     tune_length = 50,
+                                     tune_length = 4,
                                      cv_fold = 8,
                                      note = NA) {
   

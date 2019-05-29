@@ -24,11 +24,11 @@ library(caret)
 library(clustermq)
 # set up cluster to run on the high partition
 
-options(clustermq.scheduler = "slurm", 
-        clustermq.template = "~/clustermq_low.tmpl") 
-
 # options(clustermq.scheduler = "slurm", 
-#         clustermq.template = "~/clustermq_high.tmpl") 
+#         clustermq.template = "~/clustermq_low.tmpl") 
+
+options(clustermq.scheduler = "slurm",
+        clustermq.template = "~/clustermq_high.tmpl")
 #~/clustermq_low.tmpl ~/clustermq_high.tmpl
 
 dir.create("replicationCode/9-results/", showWarnings = FALSE)
@@ -175,15 +175,15 @@ batch_func <- function(i, force = FALSE){
 # parallel::detectCores(all.tests = FALSE, logical = TRUE)
 # cl <- makePSOCKcluster(8)
 # registerDoParallel(cl)
-# for (i in which(all_jobs$Estimator %in% c("caretRidgeRF") &  #which(all_jobs$Estimator %in% c("glmnet", "ranger") &
-#                 (grepl("artificial", all_jobs$Dataset) | grepl("simulated", all_jobs$Dataset)) &
-#                 !grepl("2048", all_jobs$Dataset)
-#                 )) {
-#    batch_func(i = i, force = TRUE)
-# }
-# stop("done")
-# 
-# # which(all_jobs$Dataset == "simulated-StepLinear-Function-2048" &
+for (i in which(all_jobs$Estimator %in% c("BART") &  #which(all_jobs$Estimator %in% c("glmnet", "ranger") &
+                (grepl("artificial", all_jobs$Dataset) | grepl("simulated", all_jobs$Dataset)) &
+                !grepl("2048", all_jobs$Dataset)
+                )) {
+   batch_func(i = i, force = TRUE)
+}
+stop("done")
+
+# which(all_jobs$Dataset == "simulated-StepLinear-Function-2048" &
 # stop("DONE!")
 
 Q(fun = batch_func,
