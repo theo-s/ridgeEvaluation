@@ -173,13 +173,17 @@ batch_func <- function(i, force = FALSE){
 # library(foreach)
 library(doParallel)
 parallel::detectCores(all.tests = FALSE, logical = TRUE)
-cl <- makePSOCKcluster(6)
+cl <- makePSOCKcluster(20)
 registerDoParallel(cl)
 
-for (i in which(all_jobs$Estimator %in% c("BART") &  #which(all_jobs$Estimator %in% c("glmnet", "ranger") &
-                (grepl("artificial", all_jobs$Dataset) | grepl("simulated", all_jobs$Dataset)))) {
-   batch_func(i = i, force = TRUE)
+for (i in which(all_jobs$Estimator %in% c("caretRidgeRF_nonstrict") &  #which(all_jobs$Estimator %in% c("glmnet", "ranger") &
+                (grepl("artificial", all_jobs$Dataset) | grepl("simulated", all_jobs$Dataset)))[c(1:4, 6:9, 11:14, 5, 10,15)]) {
+  print(paste("RUNNING", all_jobs[i, 1], "----", all_jobs[i, 2]))
+  batch_func(i = i, force = FALSE)
+  print(paste("Done with", all_jobs[i,1], "----", all_jobs[i,2]))
 }
+
+
 stop("done")
 
 # which(all_jobs$Dataset == "simulated-StepLinear-Function-2048" &
@@ -199,7 +203,7 @@ Q(fun = batch_func,
 
 update_tables()
 read.csv("replicationCode/9-run_all_cluster_resultsEMSE.csv")
-tt <- read.csv("replicationCode/9-run_all_cluster_resultsEMSE.csv")[,c(2,9, 4,11:13)]
+tt <- read.csv("replicationCode/9-run_all_cluster_resultsEMSE.csv")[, c(2, 9, 4, 11:13)]
 tt[,-1] <- tt[,-1] / tt$local_RF
 tt
 read.csv("replicationCode/9-run_all_cluster_resultsRuntime.csv")
