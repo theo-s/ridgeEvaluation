@@ -102,7 +102,7 @@ X$Dataset <- gsub(pattern = "_fold[12345]", replacement = "", x = X$Dataset)
 X %>% 
   group_by(Dataset) %>% 
   summarize(forestryRF = mean(forestryRF),
-            caretRidgeRF = mean(caretRidgeRF),
+            caretRidgeRF = mean(caretRidgeRF_nonstrict),
             caretRidgeTree = mean(caretRidgeTree),
             ranger = mean(ranger),
             glmnet = mean(glmnet),
@@ -139,7 +139,7 @@ for (i in 2:ncol(X_toprint_char)) {
 }
 X_toprint_char$Dataset <- gsub("_", " ", X_toprint_char$Dataset)
 colnames(X_toprint_char) <- gsub("_", " ", colnames(X_toprint_char))
-X_toprint_char$Dataset[4] <- "Boston"
+#X_toprint_char$Dataset[4] <- "Boston" # THIS MUST HAVE BEEN LEFT FROM EARLIER
 
 X_toprint_char
 X_toprint_char <- rbind(c("", "forestry", "ranger", "glmnet", "dbarts", "Cubist", "forestry", "grf", "forestry"), 
@@ -149,13 +149,27 @@ colnames(X_toprint_char) <- c("", "RF \n (forestry)",
                               "RLM \n (glmnet)",
                               "BART \n (dbarts)",
                               "Cubist \n (Cubist)",
-                              "RCART \n (forestry)",
+                              "LCART \n (forestry)",
                               "local RF \n (grf)",
-                              "Ridge RF \n (forestry)")
+                              "Linear RF \n (forestry)")
 
 
 # SuperHeat Table ==============================================================
-z <- X_toprint_char[-c(3,4,6,7,16,17,18,19,20,21,22,23,24,25),]
+z <- X_toprint_char[-c(3,4,5,6,7,16,17,18,19,20,21,22,23,24,25),]
+
+k <- z
+k[,2] <- z[,4]
+k[,4] <- z[,2]
+z <- k
+
+colnames(z) <- c("", "RLM \n (glmnet)", 
+                     "RF \n (ranger)", 
+                     "RF \n (forestry)",
+                     "BART \n (dbarts)",
+                     "Cubist \n (Cubist)",
+                     "LCART \n (forestry)",
+                     "local RF \n (grf)",
+                     "Linear RF \n (forestry)")
 
 names <- z[,1]
 z <- z[,-1]
@@ -169,7 +183,7 @@ mat <- data.matrix(z)
 
 
 rows <- row.names(z)
-#mat[,5] = NA
+#mat[,c(3,8)] = NA
 
 a <- data.matrix(t(scale(t(mat))))
 
@@ -177,21 +191,25 @@ attr(a,"scaled:center")<-NULL
 attr(a,"scaled:scale")<-NULL
 mat[is.na(mat)] <- 0.0
 
+a[,c(1)] = NA
+
+png("performance.png", height = 900, width = 1500)
 
 superheat(data.matrix(a),
           X.text = round(as.matrix(mat), 2),
-          X.text.size = 3.5,
-          heat.na.col = "white",
+          X.text.size = 10,
+          heat.na.col = "grey",
           title = "Performance on Real Datasets",
+          title.size = 18,
           legend = FALSE,
           order.rows = nrow(mat):1,
           heat.pal = c("green", "yellow", "red"),
           bottom.label.text.angle = 90,
           grid.hline = FALSE,
           grid.vline = FALSE,
-          left.label.text.size = 3,
-          bottom.label.text.size = 3)
-
+          left.label.text.size = 11,
+          bottom.label.text.size = 8)
+dev.off()
 
 
 
