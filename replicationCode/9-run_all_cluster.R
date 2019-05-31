@@ -176,8 +176,7 @@ parallel::detectCores(all.tests = FALSE, logical = TRUE)
 cl <- makePSOCKcluster(20)
 registerDoParallel(cl)
 
-for (i in which(all_jobs$Estimator %in% c("caretRidgeRF_nonstrict") &  #which(all_jobs$Estimator %in% c("glmnet", "ranger") &
-                (grepl("artificial", all_jobs$Dataset) | grepl("simulated", all_jobs$Dataset)))[c(1:4, 6:9, 11:14, 5, 10,15)]) {
+for (i in which(all_jobs$Estimator %in% c("caretRidgeRF_nonstrict"))) {
   print(paste("RUNNING", all_jobs[i, 1], "----", all_jobs[i, 2]))
   batch_func(i = i, force = FALSE)
   print(paste("Done with", all_jobs[i,1], "----", all_jobs[i,2]))
