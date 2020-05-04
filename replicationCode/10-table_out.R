@@ -150,7 +150,7 @@ colnames(X_toprint_char) <- c("", "RF \n (forestry)",
                               "BART \n (dbarts)",
                               "Cubist \n (Cubist)",
                               "LCART \n (forestry)",
-                              "local RF \n (grf)",
+                              "Local Linear Forest \n (grf)",
                               "Linear RF \n (forestry)")
 
 
@@ -168,8 +168,8 @@ colnames(z) <- c("", "RLM \n (glmnet)",
                      "BART \n (dbarts)",
                      "Cubist \n (Cubist)",
                      "LCART \n (forestry)",
-                     "local RF \n (grf)",
-                     "Linear RF \n (forestry)")
+                     "LLF \n (grf)",
+                     "LRF \n (forestry)")
 
 names <- z[,1]
 z <- z[,-1]
