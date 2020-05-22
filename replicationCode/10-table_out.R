@@ -16,6 +16,7 @@ library(magrittr)
 library(RColorBrewer)
 library(superheat)
 
+
 options(ztable.type="latex")
 
 # Output information about the data sets ---------------------------------------
@@ -95,6 +96,16 @@ print(
 )
 
 # Output information about the performance -------------------------------------
+# Run from here to get superheat table -----------------------------------------
+library(tidyverse)
+library(xtable)
+library(ztable)
+library(magrittr)
+library(RColorBrewer)
+library(superheat)
+
+options(ztable.type="latex")
+
 
 X <- read.csv("replicationCode/9-run_all_cluster_resultsEMSE.csv", stringsAsFactors = FALSE)
 X$Dataset <- gsub(pattern = "_fold[12345]", replacement = "", x = X$Dataset)
@@ -155,7 +166,21 @@ colnames(X_toprint_char) <- c("", "RF \n (forestry)",
 
 
 # SuperHeat Table ==============================================================
-z <- X_toprint_char[-c(3,4,5,6,7,16,17,18,19,20,21,22,23,24,25),]
+library(matrixStats)
+z <- X_toprint_char[-c(3,4,5,6,7,16:25),]
+z_raw <- X_toprint[-c(2,3,4,5,6,15:24),-1]
+
+row_ranks <- rowRanks(as.matrix(z_raw))
+mean_ranks <- t(as.matrix(colMeans(as.data.frame(row_ranks))))
+mean_ranks <- round(mean_ranks, digits = 2)
+mean_rank_data <- cbind("Mean Rank", as.data.frame(mean_ranks))
+colnames(mean_rank_data) <- names(z)
+z <- rbind(z, mean_rank_data[1,])
+
+# Create mean rank =============================================================
+
+names(z)
+
 
 k <- z
 k[,2] <- z[,4]
@@ -178,6 +203,8 @@ row.names(z) <- names
 names <- z[1,]
 z <- z[-1,]
 #colnames(z) <- names
+
+z[,1]
 
 mat <- data.matrix(z)
 
@@ -212,17 +239,16 @@ superheat(data.matrix(a),
 dev.off()
 
 
-
-
-
-
+# OLD code / If we need ztable =================================================
 z <- ztable(-data.matrix(q))
 
-z %>% makeHeatmap() %>% print(caption="Table 4. Heatmap Table")
+z %>% superheat() %>% print(caption="Table 4. Heatmap Table")
 
 print(z)
 
-print(makeHeatmap(z, palette = "Greens",cols=c(2,3,4,5,6,7,8,9),margin=1, reverse = TRUE) %>%
+#, palette = "Greens",cols=c(2,3,4,5,6,7,8,9),margin=1, reverse = TRUE
+
+print(superheat(z) %>%
         print(caption="Table 3. Performance on Real Datasets"))
 
 for (i in 2:nrow(X_toprint_char)) {
