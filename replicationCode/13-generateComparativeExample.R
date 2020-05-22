@@ -183,6 +183,7 @@ grf_linear_forest <- ll_regression_forest(
   mtry = 10,
   num.trees = 1,
   enable.ll.split = TRUE,
+  ci.group.size = 1,
   min.node.size = 100)
 
 pred_grf <- predict(grf_linear_forest, X)$predictions
