@@ -40,7 +40,7 @@ dir.create(data_folder_name, showWarnings = FALSE)
 set.seed(5387479) 
 #source("replicationCode/1.5-generateDataBigtest.R")
 source("replicationCode/2-generateEstimators.R")
-source("replicationCode/2.1-generateEstimators_RRF.R")
+# source("replicationCode/2.1-generateEstimators_RRF.R")
 source("replicationCode/1.8-generateDataBrieman.R")
 source("replicationCode/1.9-DS_autos_bike_soe.R")
 source("replicationCode/1.7-generateDataVaryingN.R")
@@ -112,6 +112,14 @@ batch_func <- function(i, force = FALSE){
     this_job$EMSE <- EMSE
     this_job$runtime <- summary(tm)$mean
     # save the job
+    
+    # Rerun the semilinear ridge RF  
+    if (filename == "replicationCode/9-results/job_simulated-StepLinear-Function-2048_ridgeRFStepLinear.csv") {
+      # Rename the results before we save
+      filename <- "replicationCode/9-results/job_simulated-StepLinear-Function-2048_caretRidgeRF_nonstrict.csv"
+      this_job$Estimator <- "caretRidgeRF_nonstrict"
+    }
+    
     write.csv(x = this_job, 
               file = filename, 
               row.names = FALSE) 
