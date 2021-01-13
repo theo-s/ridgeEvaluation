@@ -29,9 +29,9 @@ X$n <- as.numeric(gsub(pattern = "([^0123456789])", replacement = "", X$Dataset)
 X$Dataset <- gsub(pattern = "([-0123456789])", replacement = "", X$Dataset)
 X <- melt(data = X, id.vars = c("Dataset", "n"))
 X$dsname <- NA
-X$dsname[X$Dataset == "artificialLM"] <- "Experiment 1"
-X$dsname[X$Dataset == "simulatedStepFunction"] <- "Experiment 2"
-X$dsname[X$Dataset == "simulatedStepLinearFunction"] <- "Experiment 3"
+X$dsname[X$Dataset == "artificialLM"] <- "Experiment_1"
+X$dsname[X$Dataset == "simulatedStepFunction"] <- "Experiment_2"
+X$dsname[X$Dataset == "simulatedStepLinearFunction"] <- "Experiment_3"
 X$variable <- plyr::revalue(X$variable, c("caretRidgeRF_nonstrict" = "LRF (forestry)",
                                           "BART" = "BART (dbarts)",
                                           "forestryRF" = "RF (forestry)",
@@ -54,7 +54,7 @@ X %>% filter(!is.na(value)) %>%
 library(ggrepel)
 
 # Plot experiment 1
-for (expnm in c("Experiment 1")) {
+for (expnm in c("Experiment_1")) {
   X %>% 
     filter(!is.na(value) & dsname == expnm & variable != "cubist" & variable != "caretRidgeTree") %>% 
     dplyr::select(c(4)) %>% 
@@ -96,7 +96,7 @@ for (expnm in c("Experiment 1")) {
 
 
 # Plot experiment 2
-for (expnm in c("Experiment 2")) {
+for (expnm in c("Experiment_2")) {
   X %>% 
     filter(!is.na(value) & dsname == expnm & variable != "cubist" & variable != "caretRidgeTree") %>% 
     dplyr::select(c(4)) %>% 
@@ -138,7 +138,7 @@ for (expnm in c("Experiment 2")) {
 
 
 # Plot experiment 3
-for (expnm in c("Experiment 3")) {
+for (expnm in c("Experiment_3")) {
   X %>% 
     filter(!is.na(value) & dsname == expnm & variable != "cubist" & variable != "caretRidgeTree") %>% 
     dplyr::select(c(4)) %>% 
