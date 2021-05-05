@@ -75,7 +75,7 @@ bike <- read_csv("replicationCode/bike.csv")
 
 
 
-bike <- bike %>% 
+bike <- bike %>%
   dplyr::select(-instant,-dteday,-casual, -registered, -weekday, -season) %>%
   mutate(
     holiday = factor(holiday),
@@ -84,6 +84,28 @@ bike <- bike %>%
   )
 dim(bike)
 summary(bike)
+
+
+
+
+rf_ridge <- Rforestry::forestry(x = bike[1:2000,-11],
+                          y = bike$cnt[1:2000],
+                          minSplitGain = .04,
+                          linear = TRUE,
+                          ntree = 1,
+                          overfitPenalty = .6)
+
+rf <- Rforestry::forestry(x = bike[1:2000,-11],
+                          y = bike$cnt[1:2000],
+                          nodesizeStrictSpl = 10)
+
+
+
+getOOB(rf_ridge)
+getOOB(rf)
+
+plot(rf)
+plot(rf_ridge)
 
 
 n <- nrow(bike)
